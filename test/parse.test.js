@@ -123,7 +123,7 @@ console.log('\nthe published tree');
      index.cells.every(k => fs.existsSync(path.join(out, 'v1', 'seg', k + '.json'))));
   const cell = JSON.parse(fs.readFileSync(cellFile, 'utf8'));
   ok('a cell names its airports and carries their legs',
-     cell.v === 1 && cell.c === '2610' && cell.a[0] === 'KPDX' && cell.s.length > 50 &&
+     cell.v === 1 && cell.c === '2610' && cell.a[0] === 'KPDX' && cell.s.length > 50 && Array.isArray(cell.w) &&
      cell.s.every(g => g.length === 5 && g[0] === 0), cell.s.length + ' legs');
   // An arrival's outer legs are far from the field: they must appear in cells
   // the airport itself is nowhere near, or an aircraft out there finds nothing.
@@ -157,6 +157,40 @@ console.log('\nlegs as a net of chords');
   ok('a long diagonal is filed along its length, not across its bounding box',
      diag.indexOf('43_-101') === -1 && diag.indexOf('40_-98') === -1 && diag.indexOf('42_-99') !== -1,
      diag.length + ' cells');
+}
+
+console.log('\nen-route airways');
+{
+  const A = P.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'airways-2610.txt'), 'latin1'));
+  const q7 = A.airways.filter(a => a.name === 'Q7'), v23 = A.airways.filter(a => a.name === 'V23');
+  ok('an airway is a name and a string of fixes', q7.length >= 1 && q7[0].pts.length >= 3 && q7[0].pts[0][0] === 'JINMO',
+     q7[0].pts.map(p => p[0]).join(' '));
+  ok('every fix has a position', A.airways.every(a => a.pts.every(p => typeof p[1] === 'number' && typeof p[2] === 'number')));
+  ok('high and low airways are told apart', q7[0].level === 'H' && v23[0].level === 'L');
+  ok('the counts add up', A.stats.airwayLegs === A.airways.reduce((n, a) => n + a.pts.length - 1, 0));
+  // Take one fix away: the airway must break there, not jump the gap.
+  const lines = fs.readFileSync(path.join(__dirname, 'fixtures', 'airways-2610.txt'), 'latin1').split('\n');
+  const gone = q7[0].pts[2][0];
+  const cut = P.parse(lines.filter(l => !(l.substr(4, 2) === 'EA' && l.substr(13, 5).trim() === gone)).join('\n'));
+  const parts = cut.airways.filter(a => a.name === 'Q7');
+  ok('a fix that cannot be found breaks the string rather than being jumped',
+     parts.length === q7.length + 1 && parts.every(a => a.pts.every(p => p[0] !== gone)),
+     parts.map(a => a.pts.length).join(' + ') + ' fixes');
+
+  const out = fs.mkdtempSync(path.join(os.tmpdir(), 'cifp-'));
+  B.build(path.join(__dirname, 'fixtures', 'airways-2610.txt'), out, { minAirports: 0 });
+  const index = JSON.parse(fs.readFileSync(path.join(out, 'v1', 'index.json'), 'utf8'));
+  let legs = 0, sample = null;
+  index.cells.forEach(k => {
+    const c = JSON.parse(fs.readFileSync(path.join(out, 'v1', 'seg', k + '.json'), 'utf8'));
+    legs += c.w.length; if (!sample && c.w.length) sample = c.w[0];
+  });
+  ok('airway legs are filed by cell, with no airport needed', index.cells.length > 3 && legs >= A.stats.airwayLegs,
+     index.cells.length + ' cells');
+  ok('each leg carries its name, its place in the string, both fixes and its level',
+     sample && sample.length === 9 && typeof sample[0] === 'string' && typeof sample[1] === 'number' &&
+     typeof sample[6] === 'string' && typeof sample[7] === 'string' && /^[HLB]$/.test(sample[8]), JSON.stringify(sample));
+  fs.rmSync(out, { recursive: true, force: true });
 }
 
 console.log('\nwhich cycle is in force');

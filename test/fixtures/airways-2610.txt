@@ -1,0 +1,175 @@
+HDR01FAACIFP18      001P013203969192610  09-SEP-202612:03:55  U.S.A. DOT FAA                                                113023A4
+HDR02                                 FEDERAL AVIATION ADMINISTRATION                                                               
+HDR03                                 AERONAUTICAL INFORMATION SERVICES                                                             
+HDR04                                 CODED INSTRUMENT FLIGHT PROCEDURES VOLUME 2610  EFFECTIVE 01 OCT 2026                         
+HDR05                                 REPORT DATA ERRORS TO FAA                 TEL 800 638 8972                                    
+SUSAER       Q7          0100JINMOK1EA0E    RH                        15591242     18000     45000                         596722605
+SUSAER       Q7          0110JOGENK1EA0E    RH                        156408751567 18000     45000                         596732605
+SUSAER       Q7          0120JUDAHK1EA0E    RH                        156411471577 18000     45000                         596742605
+SUSAER       Q7          0130JUNEJK2EA0E    RH                        163222051577 18000     45000                         596752605
+SUSAER       Q7          0140JAGWAK2EA0E    RH                        149710581642 18000     45000                         596762605
+SUSAER       Q7          0150AVE  K2D 0VE   RH                                1506                                         596772605
+SUSAER       V23         0100MZB  K2D 0V    OL                        32560163     03000     17500                         665112405
+SUSAER       V23         0110CARIFK2EA0E    OL                        325600843255 03000     17500                         665122405
+SUSAER       V23         0120HURSIK2EA0E    OL                        325600453255 03000     17500                         665132405
+SUSAER       V23         0130OCN  K2D 0V    OL                        300700703255 04000     17500                         665142405
+SUSAER       V23         0140KELPSK2EA0E    OL                        300701323003 04000     17500                         665152405
+SUSAER       V23         0150DANAHK2EA0E    OL                        300700563003 04000     17500                         665162405
+SUSAER       V23         0160KRAUZK2EA0E    OL                        300700453003 04000     17500                         665172405
+SUSAER       V23         0170BALBOK2EA0E    OL                        300700623003 030000400017500                         665182405
+SUSAER       V23         0180MIDDSK2EA0E    OL                        300700923003 030000400017500                         665192405
+SUSAER       V23         0190SLI  K2D 0V    OL                        272001223003 02500     17500                         665202405
+SUSAER       V23         0200POPPRK2EA0E    OL                        272000342718 02500     17500                         665212405
+SUSAER       V23         0210HERMOK2EA0E    OL                        303400602718 02500     17500                         665222405
+SUSAER       V23         0220LAX  K2D 0V    OL                        322902003033 04000     17500                         665232405
+SUSAER       V23         0230CHATYK2EA0E    OL                        322900443216 06000     17500                         665242405
+SUSAER       V23         0240TWINEK2EA0E    OL                        322900763216 06000     17500                         665252405
+SUSAER       V23         0250VAZCUK2EA0E    OL                        322900693216 06000     17500                         665262405
+SUSAER       V23         0260CASTAK2EA0E    OL                        322901763216 09500     17500                         665272405
+SUSAER       V23         0270GMN  K2D 0V    OL                        328201013216 09500     17500                         665282405
+SUSAER       V23         0280GRAPEK2EA0E    OL                        328201483300 050000950017500                         665292405
+SUSAER       V23         0290LAMPEK2EA0E    OL                        328201763300 030000600017500                         665302405
+SUSAER       V23         0300EHF  K2D 0V    OL                        323601503300 03000     17500                         665312405
+SUSAER       V23         0310DELNOK2EA0E    OL                        323600703233 05000     17500                         665322405
+SUSAER       V23         0320PONDDK2EA0E    OL                        323601753233 05000     17500                         665332405
+SUSAER       V23         0330PIXEYK2EA0E    OL                        323601843233 06000     17500                         665342405
+SUSAER       V23         0340LATONK2EA0E    OL                        323601543233 06000     17500                         665352405
+SUSAER       V23         0350FRAMEK2EA0EE   OL                                3233                                         665362010
+SUSAER       V23         0360EBTUWK2EA0E    OL                        304600823148 04000     17500                         665372605
+SUSAER       V23         0370TURLOK2EA0E    OL                        304600953041 04000     17500                         665382405
+SUSAER       V23         0380NEBBYK2EA0E    OL                        304600573041 04000     17500                         665392405
+SUSAER       V23         0390AWALIK2EA0E    OL                        304601233041 04000     17500                         665402405
+SUSAER       V23         0400HONEZK2EA0E    OL                        304600533041 04000     17500                         665412405
+SUSAER       V23         0410WRAPSK2EA0E    OL                        304601673041 03000     17500                         665422405
+SUSAER       V23         0420LIN  K2D 0V    OL                        293701813041 02300     17500                         665432405
+SUSAER       V23         0430GALTSK2EA0E    OL                        293701602934 02300     17500                         665442405
+SUSAER       V23         0440SAC  K2D 0V    OL                        329001412934 02000     17500                         665452405
+SUSAER       V23         0450CAPTOK2EA0E    OL                        329001213288 02000     17500                         665462405
+SUSAER       V23         0460EYPOFK2EA0E    OL                        329000903288 02000     17500                         665472405
+SUSAER       V23         0470GRIMEK2EA0E    OL                        329000683288 04000     17500                         665482405
+SUSAER       V23         0480YUBBAK2EA0E    OL                        329001263288 04000     17500                         665492405
+SUSAER       V23         0490GRIDDK2EA0E    OL                        320300563288 03000     17500                         665502405
+SUSAER       V23         0500TALUMK2EA0E    OL                        320301533200 03000     17500                         665512405
+SUSAER       V23         0510JINGOK2EA0E    OL                        320300603200 03000     17500                         665522405
+SUSAER       V23         0520GONGSK2EA0E    OL                        320302303200 03000     17500                         665532405
+SUSAER       V23         0530RBL  K2D 0V    OL                        324402593200 080000300017500                         665542405
+SUSAER       V23         0540BEIRAK2EA0E    OL                        324400613230 080000650017500                         665552405
+SUSAER       V23         0550TAYTOK2EA0E    OL                        324400293230 080000650017500                         665562405
+SUSAER       V23         0560SHATAK2EA0E    OL                        324400533230 10000     17500                         665572405
+SUSAER       V23         0570FOLDSK2EA0E    OL                        324401073230 10000     17500                         665582405
+SUSAER       V23         0580MOSTYK2EA0E    OL                        324403423230 10000     17500                         665592405
+SUSAER       V23         0590FJS  K2D 0V    OL                        336602473230 10000     17500                         665602405
+SUSAER       V23         0600ZUNASK2EA0E    OL                        336600543366 10000     17500                         665612405
+SUSAER       V23         0610LEANNK2EA0E    OL                        336601203366 10000     17500                         665622405
+SUSAER       V23         0620TALEMK1EA0E    OL                        336600503366 080001000017500                         665632405
+SUSAER       V23         0630LIPWOK1EA0E    OL                        336601503366 080001000017500                         665642405
+SUSAER       V23         0640OED  K1D 0V    OL                        333301503366 07000     17500                         665652405
+SUSAER       V23         0650UZEHEK1EA0E    OL                        333300203370 07000     17500                         665662405
+SUSAER       V23         0660BROKNK1EA0E    OL                        333301403370 07000     17500                         665672405
+SUSAER       V23         0670MOURNK1EA0E    OL                        333304243370 08000     17500                         665682405
+SUSAER       V23         0680CURTIK1EA0E    OL                        333301003370 040000600017500                         665692405
+SUSAER       V23         0690SAGINK1EA0E    OL                        333301603370 040000600017500                         665702405
+SUSAER       V23         0700EUG  K1D 0V    OL                        000201173370 03000     17500                         665712405
+SUSAER       V23         0710ALFORK1EA0E    OL                        000201043546 03000     17500                         665722405
+SUSAER       V23         0720SHEDDK1EA0E    OL                        000200883546 03000     17500                         665732405
+SUSAER       V23         0730MUFFEK1EA0E    OL                        000200353546 03000     17500                         665742405
+SUSAER       V23         0740MAGOTK1EA0E    OL                        000201053546 03000     17500                         665752405
+SUSAER       V23         0750TURNOK1EA0E    OL                        000200523546 05000     17500                         665762405
+SUSAER       V23         0760EMADEK1EA0E    OL                        000201113546 05000     17500                         665772405
+SUSAER       V23         0770GNNETK1EA0E    OL                        000200823546 05000     17500                         665782405
+SUSAER       V23         0780RAWERK1EA0E    OL                        000200473546 04100     17500                         665792405
+SUSAER       V23         0790CANBYK1EA0E    OL                        000200703546 04100     17500                         665802405
+SUSAER       V23         0800OSWEGK1EA0E    OL                        000202033546 04100     17500                         665812405
+SUSAER       V23         0810BTG  K1D 0V    OL                        329201003546 060000500017500                         665822405
+SUSAER       V23         0820ROARKK1EA0E    OL                        329201103290 060000500017500                         665832405
+SUSAER       V23         0830COUGAK1EA0E    OL                        329202023290 060000500017500                         665842405
+SUSAER       V23         0840MALAYK1EA0E    OL                        357801343290 050000600017500                         665852405
+SUSAER       V23         0850ONALSK1EA0E    OL                        357801453581 050000600017500                         665862405
+SUSAER       V23         0860MCKENK1EA0E    OL                        357803563581 03000     17500                         665872405
+SUSAER       V23         0870SEA  K1D 0V    OL                        343502913581 03000     17500                         665882405
+SUSAER       V23         0880PAE  K1D 0VE   OL                                3426                                         665892512
+SUSAD        AVE   K2011710VDHW N35384911W119584298    N35384911W119584298E0160007102     NARAVENAL                        249941703
+SUSAD        BTG   K1011660VTHW N45445212W122352953    N45445163W122353227E0210002532     NARBATTLE GROUND                 250521605
+SUSAD        EHF   K2011540VTHW N35290440W119055026    N35290440W119055026E0140005492     NARSHAFTER                       252161610
+SUSAD        EUG   K1011290VTHW N44071523W123132219    N44071523W123132219E0150003642     NAREUGENE                        252501810
+SUSAD        FJS   K2011625VDLW N41265881W122482321    N41265881W122482321E0190049001     NARFORT JONES                    252782401
+SUSAD        GMN   K2011610VTLW N34481450W118514090    N34481450W118514090E0160049201     NARGORMAN                        253362609
+SUSAD        LAX   K2011360VTHW N33555934W118255525    N33560033W118255677E0150001852     NARLOS ANGELES                   254832510
+SUSAD        LIN   K2011480VDHW N38042849W121001389    N38042849W121001389E0170002662     NARLINDEN                        255062012
+SUSAD        MZB   K2011780VTHW N32465595W117133152    N32465595W117133152E0150000102     NARMISSION BAY                   256262208
+SUSAD        OCN   K2011530VTHW N33142628W117250380    N33142628W117250380E0150000522     NAROCEANSIDE                     256692609
+SUSAD        OED   K1011360VTHW N42284647W122544656    N42284647W122544656E0190020832     NARROGUE VALLEY                  256741605
+SUSAD        PAE   K1011060VDLW N47551140W122164009    N47551203W122164182E0200006691     NARPAINE                         257082110
+SUSAD        RBL   K2011570VTHW N40055608W122141086    N40055608W122141086E0180003212     NARRED BLUFF                     257731912
+SUSAD        SAC   K2011520VTHW N38263746W121330595    N38263746W121330595E0170000032     NARSACRAMENTO                    258111903
+SUSAD        SEA   K1011680VTHW N47260734W122183462    N47260734W122183462E0190003482     NARSEATTLE                       258271702
+SUSAD        SLI   K2011570VTLW N33465988W118031713    N33465988W118031713E0150000221     NARSEAL BEACH                    258472002
+SUSAEAENRT   ALFOR K10    C   L N44182973W123090718                       E0143     NAR           ALFOR                    276202605
+SUSAEAENRT   AWALI K20    C   L N37374330W120330976                       E0125     NAR           AWALI                    282862605
+SUSAEAENRT   BALBO K20    C   L N33360165W117501965                       E0112     NAR           BALBO                    285042605
+SUSAEAENRT   BEIRA K20    C   L N40303854W122242724                       E0134     NAR           BEIRA                    288042605
+SUSAEAENRT   BROKN K10    C   L N42453747W122575329                       E0140     NAR           BROKN                    296362605
+SUSAEAENRT   CANBY K10    C   L N45183805W122455361                       E0145     NAR           CANBY                    301622605
+SUSAEAENRT   CAPTO K20    R   L N38401995W121372755                       E0129     NAR           CAPTO                    302332605
+SUSAEAENRT   CARIF K20    C   L N33021895W117195774                       E0110     NAR           CARIF                    302562605
+SUSAEAENRT   CASTA K20    C   L N34315807W118433573                       E0116     NAR           CASTA                    303252504
+SUSAEAENRT   CHATY K20    R   L N34143269W118350015                       E0115     NAR           CHATY                    312172605
+SUSAEAENRT   COUGA K10    C   L N46053123W122403859                       E0147     NAR           COUGA                    320572605
+SUSAEAENRT   CURTI K10    C   L N43412998W123082451                       E0142     NAR           CURTI                    324222605
+SUSAEAENRT   DANAH K20    C   L N33285162W117415415                       E0111     NAR           DANAH                    326132605
+SUSAEAENRT   DELNO K20    R   L N35425777W119125073                       E0119     NAR           DELNO                    328632605
+SUSAEAENRT   EBTUW K20    C   L N37192327W120145119                       E0124     NAR           EBTUW                    338042605
+SUSAEAENRT   EMADE K10    C   L N44553509W122545345                       E0144     NAR           EMADE                    341672605
+SUSAEAENRT   EYPOF K20    C   L N38520368W121411245                       E0130     NAR           EYPOF                    345792605
+SUSAEAENRT   FOLDS K20    C   L N40441656W122301069                       E0135     NAR           FOLDS                    355292605
+SUSAEAENRT   FRAME K20    C   L N36364674W119402553                       E0122     NAR           FRAME                    357092504
+SUSAEAENRT   GALTS K20    C   L N38161400W121173675                       E0128     NAR           GALTS                    359052605
+SUSAEAENRT   GNNET K10    C   L N45061574W122504425                       E0145     NAR           GNNET                    363642605
+SUSAEAENRT   GONGS K20    C   L N39443622W122030133                       E0132     NAR           GONGS                    364222605
+SUSAEAENRT   GRAPE K20    C   L N34575649W118550136                       E0117     NAR           GRAPE                    365832605
+SUSAEAENRT   GRIDD K20    C   L N39193869W121500750                       E0131     NAR           GRIDD                    366252605
+SUSAEAENRT   GRIME K20    C   L N39004933W121440181                       E0130     NAR           GRIME                    366382605
+SUSAEAENRT   HERMO K20    R   L N33513235W118211046                       E0114     NAR           HERMO                    375112504
+SUSAEAENRT   HONEZ K20    C   L N37471847W120424867                       E0126     NAR           HONEZ                    380822605
+SUSAEAENRT   HURSI K20    R   L N33101358W117231722                       E0110     NAR           HURSI                    385002605
+SUSAEAENRT   JAGWA K20    W   H N37194900W120381800                       E0125     NAR           JAGWA                    392802605
+SUSAEAENRT   JINGO K20    C   L N39390067W122000701                       E0132     NAR           JINGO                    399822605
+SUSAEAENRT   JINMO K10    W   H N46221700W122073100                       E0146     NAR           JINMO                    399862605
+SUSAEAENRT   JOGEN K10    W   H N44194400W121390400                       E0141     NAR           JOGEN                    401842605
+SUSAEAENRT   JUDAH K10    W   H N42532546W121192813                       E0137     NAR           JUDAH                    404662605
+SUSAEAENRT   JUNEJ K20    W   H N41000600W120550600                       E0133     NAR           JUNEJ                    405892605
+SUSAEAENRT   KELPS K20    R   L N33192712W117305419                       E0111     NAR           KELPS                    411302605
+SUSAEAENRT   KRAUZ K20    R   L N33324941W117463353                       E0112     NAR           KRAUZ                    420932605
+SUSAEAENRT   LAMPE K20    R   L N35120948W118595660                       E0117     NAR           LAMPE                    426622605
+SUSAEAENRT   LATON K20    C   L N36223461W119330474                       E0121     NAR           LATON                    427492605
+SUSAEAENRT   LEANN K20    R   L N41565435W122512734                       E0138     NAR           LEANN                    428672605
+SUSAEAENRT   LIPWO K10    R   L N42134885W122531256                       E0139     NAR           LIPWO                    431392605
+SUSAEAENRT   MAGOT K10    R   L N44402505W123004498                       E0144     NAR           MAGOT                    437632605
+SUSAEAENRT   MALAY K10    C   L N46252199W122453929                       E0147     NAR           MALAY                    438692605
+SUSAEAENRT   MCKEN K10    C   L N46520370W122334542                       E0148     NAR           MCKEN                    441632605
+SUSAEAENRT   MIDDS K20    C   L N33402726W117553280                       E0112     NAR           MIDDS                    444062605
+SUSAEAENRT   MOSTY K20    W   L N40542513W122342793                       E0135     NAR           MOSTY                    447802605
+SUSAEAENRT   MOURN K10    R   L N42592993W123002823                       E0140     NAR           MOURN                    447942605
+SUSAEAENRT   MUFFE K10    R   L N44370125W123020319                       E0144     NAR           MUFFE                    449112605
+SUSAEAENRT   NEBBY K20    C   L N37331379W120283947                       E0125     NAR           NEBBY                    451972605
+SUSAEAENRT   ONALS K10    C   L N46380906W122395129                       E0148     NAR           ONALS                    461572605
+SUSAEAENRT   OSWEG K10    C   L N45252110W122431466                       E0145     NAR           OSWEG                    463862605
+SUSAEAENRT   PIXEY K20    C   L N36053657W119242302                       E0120     NAR           PIXEY                    471852605
+SUSAEAENRT   PONDD K20    C   L N35492599W119160605                       E0119     NAR           PONDD                    473952605
+SUSAEAENRT   POPPR K20    C   L N33503357W118171790                       E0113     NAR           POPPR                    474252605
+SUSAEAENRT   RAWER K10    C   L N45140832W122473954                       E0145     NAR           RAWER                    479832605
+SUSAEAENRT   ROARK K10    C   L N45544310W122375645                       E0146     NAR           ROARK                    484252605
+SUSAEAENRT   SAGIN K10    C   L N43512434W123101846                       E0143     NAR           SAGIN                    489112605
+SUSAEAENRT   SHATA K20    R   L N40391206W122280253                       E0135     NAR           SHATA                    493542605
+SUSAEAENRT   SHEDD K10    C   L N44283288W123051761                       E0144     NAR           SHEDD                    493692605
+SUSAEAENRT   TALEM K10    C   L N42084970W122524150                       E0138     NAR           TALEM                    505442605
+SUSAEAENRT   TALUM K20    C   L N39244895W121524682                       E0131     NAR           TALUM                    505642605
+SUSAEAENRT   TAYTO K20    R   L N40362680W122265313                       E0135     NAR           TAYTO                    506662605
+SUSAEAENRT   TURLO K20    C   L N37254706W120211351                       E0124     NAR           TURLO                    514732605
+SUSAEAENRT   TURNO K10    R   L N44503374W122565021                       E0144     NAR           TURNO                    514792605
+SUSAEAENRT   TWINE K20    C   L N34183490W118365932                       E0115     NAR           TWINE                    515272605
+SUSAEAENRT   UZEHE K10    R   L N42433855W122573124                       E0140     NAR           UZEHE                    519062605
+SUSAEAENRT   VAZCU K20    C   L N34253704W118402726                       E0115     NAR           VAZCU                    519972605
+SUSAEAENRT   WRAPS K20    C   L N37512860W120470148                       E0126     NAR           WRAPS                    541852605
+SUSAEAENRT   YUBBA K20    C   L N39072578W121460977                       E0130     NAR           YUBBA                    547652605
+SUSAEAENRT   ZUNAS K20    C   L N41513417W122505437                       E0138     NAR           ZUNAS                    556892605

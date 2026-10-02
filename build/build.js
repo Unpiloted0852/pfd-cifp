@@ -130,18 +130,33 @@ function build(src, outDir, opts) {
 
     chordsOf(a).forEach(function (c) {
       cellsOf(c).forEach(function (key) {
-        var cell = cells[key] || (cells[key] = { a: [], s: [], _i: Object.create(null) });
+        var cell = cells[key] || (cells[key] = { a: [], s: [], w: [], _i: Object.create(null) });
         if (!(id in cell._i)) { cell._i[id] = cell.a.length; cell.a.push(id); }
         cell.s.push([cell._i[id], c[0], c[1], c[2], c[3]]);
       });
     });
   });
 
+  // Airways, leg by leg, into the same cells. Each leg carries its airway's
+  // name and its place in the string, so the extension can put neighbouring
+  // legs back together, and the fixes at its two ends.
+  res.airways.forEach(function (a) {
+    for (var n = 0; n + 1 < a.pts.length; n++) {
+      var p0 = a.pts[n], p1 = a.pts[n + 1];
+      var c = [r4(p0[1]), r4(p0[2]), r4(p1[1]), r4(p1[2])];
+      cellsOf(c).forEach(function (key) {
+        var cell = cells[key] || (cells[key] = { a: [], s: [], w: [], _i: Object.create(null) });
+        cell.w.push([a.name, n, c[0], c[1], c[2], c[3], p0[0], p1[0], a.level]);
+      });
+    }
+  });
+
   var segDir = path.join(root, 'seg');
   fs.mkdirSync(segDir, { recursive: true });
   var cellKeys = Object.keys(cells).sort(), segBytes = 0, segMax = 0;
   cellKeys.forEach(function (key) {
-    var body = JSON.stringify({ v: FORMAT, c: res.cycle, a: cells[key].a, s: cells[key].s });
+    var body = JSON.stringify({ v: FORMAT, c: res.cycle, a: cells[key].a, s: cells[key].s,
+                                w: cells[key].w });
     segBytes += body.length;
     if (body.length > segMax) segMax = body.length;
     fs.writeFileSync(path.join(segDir, key + '.json'), body);
@@ -183,6 +198,7 @@ if (require.main === module) {
               ', expires ' + r.index.expires);
   console.log(r.index.apt.length + ' airports, ' + r.stats.procedures + ' procedures, ' +
               r.stats.legs + ' legs, ' + r.stats.unresolved + ' fixes unresolved');
+  console.log(r.stats.airways + ' airway strings, ' + r.stats.airwayLegs + ' airway legs');
   console.log((r.bytes / 1048576).toFixed(1) + ' MB of airport files');
   console.log(r.cells + ' cells, ' + (r.segBytes / 1048576).toFixed(1) + ' MB of leg files, largest ' +
               Math.round(r.segMax / 1024) + ' kB');

@@ -58,6 +58,7 @@ so "the airports nearby" is the wrong list to search.
 |---|---|
 | `a` | the airports with a leg in or beside this cell |
 | `s` | legs as `[index into a, lat, lon, lat, lon]`, start to end, in the direction flown |
+| `w` | en-route airway legs as `[name, n, lat, lon, lat, lon, fix, fix, level]` — `n` is the leg's place along its airway, so neighbouring legs can be joined; `level` is `H`, `L` or `B` |
 
 These are straight chords between fixes — a net to catch candidates with, not
 geometry to measure against. Curved legs appear as their chord.

@@ -254,7 +254,38 @@ function parse(text) {
     return hit || null;
   }
 
-  var stats = { legs: 0, unresolved: 0, airports: 0, procedures: 0 };
+  var stats = { legs: 0, unresolved: 0, airports: 0, procedures: 0, airways: 0, airwayLegs: 0 };
+
+  /*
+   * En-route airways: a name and a string of fixes.
+   *
+   * Records for one airway are contiguous and in sequence. A fix that cannot
+   * be found — the far end of an airway that leaves the area this file covers
+   * — breaks the string there, and what follows starts a new one under the
+   * same name, so a leg is never drawn across a gap.
+   */
+  var airways = [], cur = null, curKey = null;
+  for (i = 0; i < lines.length; i++) {
+    line = lines[i];
+    if (line.length < 132 || line[0] !== 'S' || line[4] !== 'E' || line[5] !== 'R') continue;
+    if (col(line, 39, 39) > '1') continue;
+    var awy = col(line, 14, 18).trim();
+    var akey = col(line, 2, 4) + '|' + awy;
+    var pos = locate({ id: col(line, 30, 34).trim(), icao: col(line, 35, 36), sec: col(line, 37, 38) }, '');
+    if (akey !== curKey || !pos) {
+      cur = null; curKey = akey;
+      if (!pos) continue;
+    }
+    if (!cur) {
+      var lvl = col(line, 46, 46);
+      cur = { name: awy, level: (lvl === 'H' || lvl === 'L') ? lvl : 'B', pts: [] };
+      airways.push(cur);
+    }
+    cur.pts.push([col(line, 30, 34).trim(), pos[0], pos[1]]);
+  }
+  airways = airways.filter(function (a) { return a.pts.length >= 2; });
+  stats.airways = airways.length;
+  airways.forEach(function (a) { stats.airwayLegs += a.pts.length - 1; });
 
   for (i = 0; i < lines.length; i++) {
     line = lines[i];
@@ -320,7 +351,7 @@ function parse(text) {
     out[id] = ap;
     stats.airports++;
   });
-  return { cycle: cycle, effective: effective, airports: out, stats: stats };
+  return { cycle: cycle, effective: effective, airports: out, airways: airways, stats: stats };
 }
 
 module.exports = {
