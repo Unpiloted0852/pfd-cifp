@@ -36,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       deploy: ${{ steps.plan.outputs.deploy }}
+      effective: ${{ steps.plan.outputs.effective }}
     steps:
       - uses: actions/checkout@v4
 
@@ -108,6 +109,24 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+      # A record of what was published, committed once per cycle. It is also
+      # what keeps this workflow alive: GitHub switches off scheduled runs in a
+      # public repository that has seen no activity for 60 days, and without
+      # this the only activity here would be the schedule itself.
+      - uses: actions/checkout@v4
+      - name: Record the cycle
+        run: |
+          printf '%s\n' '${{ needs.build.outputs.effective }}' > PUBLISHED
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add PUBLISHED
+          git diff --cached --quiet || git commit -m "Published the cycle effective ${{ needs.build.outputs.effective }}"
+          git push

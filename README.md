@@ -24,7 +24,9 @@ takes effect it:
 3. builds `out/v1/` and checks the result is the cycle it asked for,
 4. deploys `out/` to GitHub Pages.
 
-Only the JSON in `out/` is deployed. The code in this repository is not.
+Only the JSON in `out/` is deployed. After a deploy it commits a one-line
+`PUBLISHED` file naming the cycle — a record, and the activity that stops
+GitHub switching off the schedule in a quiet public repository.
 
 It can also be run by hand from the Actions tab, with **force** to rebuild a
 cycle that is already published.
