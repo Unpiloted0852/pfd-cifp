@@ -7,6 +7,7 @@
  * Writes:
  *   <out>/v1/index.json        cycle, dates, and every airport covered with its position
  *   <out>/v1/apt/<ID>.json     one airport's SIDs, STARs and approaches
+ *   <out>/v1/seg/<lat>_<lon>.json   every procedure leg crossing that one-degree cell
  *
  * The "v1" is the FORMAT version, not the data cycle. An extension already
  * installed keeps asking for v1, so a change that would break it goes to v2
@@ -24,6 +25,80 @@ function addDays(iso, n) {
   var d = new Date(iso + 'T00:00:00Z');
   d.setUTCDate(d.getUTCDate() + n);
   return d.toISOString().slice(0, 10);
+}
+
+var DEG = Math.PI / 180;
+
+/*
+ * The straight legs of every procedure at an airport, as fix-to-fix chords.
+ *
+ * This is NOT the geometry anything is measured against — the extension builds
+ * that itself, arcs and all, from the airport file. It is a coarse net: enough
+ * to answer "which airports have a procedure passing under this aircraft",
+ * which is the one question the airport files cannot answer without first
+ * knowing which airport to open. An arrival begins two hundred miles from the
+ * field it serves.
+ */
+var CHORD_TO = { TF: 1, CF: 1, DF: 1, RF: 1, AF: 1 };
+
+function chordsOf(a) {
+  var seen = Object.create(null), out = [];
+  [a.app, a.sid, a.star].forEach(function (list) {
+    list.forEach(function (proc) {
+      proc.rt.forEach(function (route) {
+        var at = null;
+        route.l.forEach(function (leg) {
+          var pt = (typeof leg.f === 'number') ? a.x[leg.f] : null;
+          if (leg.p === 'IF') { at = pt; return; }
+          if (CHORD_TO[leg.p] && pt) {
+            if (at && (at[1] !== pt[1] || at[2] !== pt[2])) {
+              var c = [r4(at[1]), r4(at[2]), r4(pt[1]), r4(pt[2])];
+              var k = c.join(',');
+              // Transitions share legs; one copy says all there is to say.
+              if (!seen[k]) { seen[k] = 1; out.push(c); }
+            }
+            at = pt;
+            return;
+          }
+          // A hold returns to its fix. Anything else ends somewhere unknown,
+          // and no chord is drawn from an unknown place.
+          if (leg.p === 'HM' || leg.p === 'HF' || leg.p === 'HA' || leg.p === 'PI') { if (pt) at = pt; }
+          else at = null;
+        });
+      });
+    });
+  });
+  return out;
+}
+
+function r4(v) { return Math.round(v * 1e4) / 1e4; }
+
+/*
+ * The one-degree cells a chord passes through or close beside.
+ *
+ * Walked along the chord rather than taken from its bounding box: a leg two
+ * hundred miles long on a diagonal has a bounding box of nine cells and
+ * actually crosses four. The margin puts a leg running along a cell boundary
+ * into the cells on both sides, so an aircraft only ever needs the one cell it
+ * is in.
+ */
+var CELL_MARGIN_DEG = 0.06;      // about three and a half miles of latitude
+
+function cellsOf(c) {
+  var out = Object.create(null);
+  var dLat = c[2] - c[0], dLon = c[3] - c[1];
+  var lenDeg = Math.sqrt(dLat * dLat + dLon * dLon);
+  var steps = Math.max(1, Math.ceil(lenDeg / 0.05));
+  for (var i = 0; i <= steps; i++) {
+    var la = c[0] + dLat * i / steps, lo = c[1] + dLon * i / steps;
+    var mLon = CELL_MARGIN_DEG / Math.max(0.2, Math.cos(la * DEG));
+    for (var a = -1; a <= 1; a++) {
+      for (var b = -1; b <= 1; b++) {
+        out[Math.floor(la + a * CELL_MARGIN_DEG) + '_' + Math.floor(lo + b * mLon)] = 1;
+      }
+    }
+  }
+  return Object.keys(out);
 }
 
 function build(src, outDir, opts) {
@@ -44,6 +119,7 @@ function build(src, outDir, opts) {
   fs.mkdirSync(aptDir, { recursive: true });
 
   var bytes = 0;
+  var cells = Object.create(null);       // "lat_lon" -> { a: [ids], s: [[ai, la, lo, la, lo]] }
   ids.forEach(function (id) {
     var a = res.airports[id];
     var doc = { v: FORMAT, c: res.cycle, id: a.id, lat: a.lat, lon: a.lon, mv: a.mv, el: a.el,
@@ -51,6 +127,24 @@ function build(src, outDir, opts) {
     var body = JSON.stringify(doc);
     bytes += body.length;
     fs.writeFileSync(path.join(aptDir, id + '.json'), body);
+
+    chordsOf(a).forEach(function (c) {
+      cellsOf(c).forEach(function (key) {
+        var cell = cells[key] || (cells[key] = { a: [], s: [], _i: Object.create(null) });
+        if (!(id in cell._i)) { cell._i[id] = cell.a.length; cell.a.push(id); }
+        cell.s.push([cell._i[id], c[0], c[1], c[2], c[3]]);
+      });
+    });
+  });
+
+  var segDir = path.join(root, 'seg');
+  fs.mkdirSync(segDir, { recursive: true });
+  var cellKeys = Object.keys(cells).sort(), segBytes = 0, segMax = 0;
+  cellKeys.forEach(function (key) {
+    var body = JSON.stringify({ v: FORMAT, c: res.cycle, a: cells[key].a, s: cells[key].s });
+    segBytes += body.length;
+    if (body.length > segMax) segMax = body.length;
+    fs.writeFileSync(path.join(segDir, key + '.json'), body);
   });
 
   var index = {
@@ -68,10 +162,14 @@ function build(src, outDir, opts) {
     apt: ids.map(function (id) {
       var a = res.airports[id];
       return [id, Math.round(a.lat * 1000) / 1000, Math.round(a.lon * 1000) / 1000];
-    })
+    }),
+    // The cells that have a file under seg/. Listed so the extension never
+    // asks for one that is not there: most of the ocean, and all of Europe.
+    cells: cellKeys
   };
   fs.writeFileSync(path.join(root, 'index.json'), JSON.stringify(index));
-  return { index: index, stats: res.stats, bytes: bytes };
+  return { index: index, stats: res.stats, bytes: bytes,
+           segBytes: segBytes, segMax: segMax, cells: cellKeys.length };
 }
 
 if (require.main === module) {
@@ -86,6 +184,8 @@ if (require.main === module) {
   console.log(r.index.apt.length + ' airports, ' + r.stats.procedures + ' procedures, ' +
               r.stats.legs + ' legs, ' + r.stats.unresolved + ' fixes unresolved');
   console.log((r.bytes / 1048576).toFixed(1) + ' MB of airport files');
+  console.log(r.cells + ' cells, ' + (r.segBytes / 1048576).toFixed(1) + ' MB of leg files, largest ' +
+              Math.round(r.segMax / 1024) + ' kB');
 }
 
-module.exports = { build: build, addDays: addDays };
+module.exports = { build: build, addDays: addDays, chordsOf: chordsOf, cellsOf: cellsOf };

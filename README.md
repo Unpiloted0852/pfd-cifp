@@ -35,6 +35,7 @@ cycle that is already published.
 
     v1/index.json       the cycle, its dates, and every airport covered
     v1/apt/KPDX.json    one airport's approaches, SIDs and STARs
+    v1/seg/45_-123.json every procedure leg crossing one one-degree cell
 
 `v1` is the **format** version. An installed extension keeps asking for `v1`,
 so a change that would break it must be published as `v2` beside it.
@@ -47,6 +48,19 @@ so a change that would break it must be published as `v2` beside it.
 | `effective` | the day it came into force |
 | `expires` | the day the next one does; from then these are out of date |
 | `apt` | `[id, lat, lon]` for every airport with at least one procedure |
+| `cells` | the cells that have a file under `seg/`, as `"lat_lon"` of the south-west corner |
+
+A cell file answers one question: which airports have a procedure passing
+through here. An arrival starts two hundred miles from the airport it serves,
+so "the airports nearby" is the wrong list to search.
+
+| field | meaning |
+|---|---|
+| `a` | the airports with a leg in or beside this cell |
+| `s` | legs as `[index into a, lat, lon, lat, lon]`, start to end, in the direction flown |
+
+These are straight chords between fixes — a net to catch candidates with, not
+geometry to measure against. Curved legs appear as their chord.
 
 An airport file:
 

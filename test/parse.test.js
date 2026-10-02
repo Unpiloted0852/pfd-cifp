@@ -114,7 +114,49 @@ console.log('\nthe published tree');
   ok('the airport file is stamped with its cycle', doc.v === 1 && doc.c === '2610' && doc.id === 'KPDX');
   ok('and is small', r.bytes < 40000, r.bytes + ' bytes');
   ok('with no private working fields left in it', !('_pi' in doc) && !/"icao"/.test(JSON.stringify(doc)));
+
+  // The net of legs, by one-degree cell.
+  const cellFile = path.join(out, 'v1', 'seg', '45_-123.json');
+  ok('the index lists the cells that have a leg file', Array.isArray(index.cells) && index.cells.indexOf('45_-123') !== -1,
+     index.cells.length + ' cells');
+  ok('and every listed cell has one',
+     index.cells.every(k => fs.existsSync(path.join(out, 'v1', 'seg', k + '.json'))));
+  const cell = JSON.parse(fs.readFileSync(cellFile, 'utf8'));
+  ok('a cell names its airports and carries their legs',
+     cell.v === 1 && cell.c === '2610' && cell.a[0] === 'KPDX' && cell.s.length > 50 &&
+     cell.s.every(g => g.length === 5 && g[0] === 0), cell.s.length + ' legs');
+  // An arrival's outer legs are far from the field: they must appear in cells
+  // the airport itself is nowhere near, or an aircraft out there finds nothing.
+  const far = index.cells.filter(k => {
+    const la = +k.split('_')[0], lo = +k.split('_')[1];
+    return Math.abs(la - 45) > 1 || Math.abs(lo + 123) > 1;
+  });
+  ok('legs far from the airport are filed where they are', far.length > 5, far.length + ' cells beyond the field\'s own');
   fs.rmSync(out, { recursive: true, force: true });
+}
+
+console.log('\nlegs as a net of chords');
+{
+  const ch = B.chordsOf(pdx);
+  const key = c => c.join(',');
+  ok('each leg appears once, however many transitions share it', new Set(ch.map(key)).size === ch.length,
+     ch.length + ' chords');
+  const pt = n => pdx.x.find(p => p[0] === n);
+  const has = (a, b) => ch.some(c => Math.abs(c[0] - pt(a)[1]) < 1e-4 && Math.abs(c[1] - pt(a)[2]) < 1e-4 &&
+                                     Math.abs(c[2] - pt(b)[1]) < 1e-4 && Math.abs(c[3] - pt(b)[2]) < 1e-4);
+  ok('a straight leg', has('CIZZL', 'DAYSS'));
+  ok('a curved leg, as its chord', has('DAYSS', 'RIPPP'));
+  ok('in the direction it is flown, not both', !has('DAYSS', 'CIZZL'));
+  ok('nothing is drawn out of a climb to an altitude', !has('RW10L', 'BATYL'),
+     '', 'where that leg starts depends on the aeroplane, so there is no chord to file');
+  // A leg along a meridian at 45.5N, -122.99: just inside the cell's western edge.
+  const edge = B.cellsOf([45.2, -122.99, 45.8, -122.99]);
+  ok('a leg beside a boundary is filed on both sides of it',
+     edge.indexOf('45_-123') !== -1 && edge.indexOf('45_-124') !== -1, edge.join(' '));
+  const diag = B.cellsOf([40.5, -100.5, 43.5, -97.5]);
+  ok('a long diagonal is filed along its length, not across its bounding box',
+     diag.indexOf('43_-101') === -1 && diag.indexOf('40_-98') === -1 && diag.indexOf('42_-99') !== -1,
+     diag.length + ' cells');
 }
 
 console.log('\nwhich cycle is in force');
