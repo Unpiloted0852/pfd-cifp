@@ -86,11 +86,25 @@ var CELL_MARGIN_DEG = 0.06;      // about three and a half miles of latitude
 
 function cellsOf(c) {
   var out = Object.create(null);
-  var dLat = c[2] - c[0], dLon = c[3] - c[1];
-  var lenDeg = Math.sqrt(dLat * dLat + dLon * dLon);
-  var steps = Math.max(1, Math.ceil(lenDeg / 0.05));
+  // Along the GREAT CIRCLE between the ends, which is what is flown. A long
+  // leg bows towards the pole by miles, and stepping along a straight line in
+  // latitude and longitude files it in the wrong cells near a boundary.
+  var la1 = c[0] * DEG, lo1 = c[1] * DEG, la2 = c[2] * DEG, lo2 = c[3] * DEG;
+  var h = Math.sin((la2 - la1) / 2) * Math.sin((la2 - la1) / 2) +
+          Math.cos(la1) * Math.cos(la2) * Math.sin((lo2 - lo1) / 2) * Math.sin((lo2 - lo1) / 2);
+  var d = 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+  var steps = Math.max(1, Math.ceil((d / DEG) / 0.05));
   for (var i = 0; i <= steps; i++) {
-    var la = c[0] + dLat * i / steps, lo = c[1] + dLon * i / steps;
+    var f = i / steps, la, lo;
+    if (d < 1e-9) { la = c[0]; lo = c[1]; }
+    else {
+      var A = Math.sin((1 - f) * d) / Math.sin(d), B = Math.sin(f * d) / Math.sin(d);
+      var x = A * Math.cos(la1) * Math.cos(lo1) + B * Math.cos(la2) * Math.cos(lo2);
+      var y = A * Math.cos(la1) * Math.sin(lo1) + B * Math.cos(la2) * Math.sin(lo2);
+      var z = A * Math.sin(la1) + B * Math.sin(la2);
+      la = Math.atan2(z, Math.sqrt(x * x + y * y)) / DEG;
+      lo = Math.atan2(y, x) / DEG;
+    }
     var mLon = CELL_MARGIN_DEG / Math.max(0.2, Math.cos(la * DEG));
     for (var a = -1; a <= 1; a++) {
       for (var b = -1; b <= 1; b++) {
@@ -102,6 +116,10 @@ function cellsOf(c) {
 }
 
 function build(src, outDir, opts) {
+  // Names this build. The same cycle can be built more than once — a change
+  // here adds something to it — and the extension must not go on using a cell
+  // file it fetched from the earlier build.
+  var built = (opts && opts.built) || new Date().toISOString();
   var minAirports = (opts && typeof opts.minAirports === 'number') ? opts.minAirports : 2000;
   var res = cifp.parse(fs.readFileSync(src, 'latin1'));
   if (!res.cycle || !res.effective) throw new Error('no cycle header found in ' + src);
@@ -155,7 +173,7 @@ function build(src, outDir, opts) {
   fs.mkdirSync(segDir, { recursive: true });
   var cellKeys = Object.keys(cells).sort(), segBytes = 0, segMax = 0;
   cellKeys.forEach(function (key) {
-    var body = JSON.stringify({ v: FORMAT, c: res.cycle, a: cells[key].a, s: cells[key].s,
+    var body = JSON.stringify({ v: FORMAT, c: res.cycle, b: built, a: cells[key].a, s: cells[key].s,
                                 w: cells[key].w });
     segBytes += body.length;
     if (body.length > segMax) segMax = body.length;
@@ -169,6 +187,7 @@ function build(src, outDir, opts) {
     // A cycle runs for 28 days. This is the day the NEXT one comes into
     // force — from this date on, these procedures are no longer current.
     expires: addDays(res.effective, 28),
+    built: built,
     src: 'FAA CIFP, public domain. Not for navigation.',
     // Identifier and position. The extension asks "what is near this
     // aircraft", and CIFP names small fields by their FAA identifier where

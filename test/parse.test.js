@@ -107,6 +107,8 @@ console.log('\nthe published tree');
   const r = B.build(FIX, out, { minAirports: 1 });
   const index = JSON.parse(fs.readFileSync(path.join(out, 'v1', 'index.json'), 'utf8'));
   const doc = JSON.parse(fs.readFileSync(path.join(out, 'v1', 'apt', 'KPDX.json'), 'utf8'));
+  ok('the index and every cell carry the same build stamp',
+     typeof index.built === 'string' && JSON.parse(fs.readFileSync(path.join(out, 'v1', 'seg', index.cells[0] + '.json'), 'utf8')).b === index.built);
   ok('the index names the cycle and when it lapses',
      index.v === 1 && index.cycle === '2610' && index.effective === '2026-10-01' && index.expires === '2026-10-29');
   ok('and lists each airport with its position',
@@ -153,6 +155,10 @@ console.log('\nlegs as a net of chords');
   const edge = B.cellsOf([45.2, -122.99, 45.8, -122.99]);
   ok('a leg beside a boundary is filed on both sides of it',
      edge.indexOf('45_-123') !== -1 && edge.indexOf('45_-124') !== -1, edge.join(' '));
+  // 400 nm due east along 49.95N: the great circle rises over the 50th parallel in the middle.
+  const bow = B.cellsOf([49.95, -110, 49.95, -100]);
+  ok('a long leg is filed where the great circle goes, not the straight line',
+     bow.indexOf('50_-105') !== -1 && bow.indexOf('49_-105') !== -1, bow.filter(k => /^50_/.test(k)).length + ' cells north of 50');
   const diag = B.cellsOf([40.5, -100.5, 43.5, -97.5]);
   ok('a long diagonal is filed along its length, not across its bounding box',
      diag.indexOf('43_-101') === -1 && diag.indexOf('40_-98') === -1 && diag.indexOf('42_-99') !== -1,

@@ -47,6 +47,7 @@ so a change that would break it must be published as `v2` beside it.
 | `cycle` | the FAA's cycle number, e.g. `"2610"` |
 | `effective` | the day it came into force |
 | `expires` | the day the next one does; from then these are out of date |
+| `built` | when this build ran; cell files carry the same stamp as `b`, so a rebuild within a cycle is noticed |
 | `apt` | `[id, lat, lon]` for every airport with at least one procedure |
 | `cells` | the cells that have a file under `seg/`, as `"lat_lon"` of the south-west corner |
 
