@@ -1,0 +1,11 @@
+{
+  "name": "pfd-cifp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Reduces the FAA CIFP to one small JSON file per airport for the tar1090 PFD extension.",
+  "scripts": {
+    "test": "node test/parse.test.js",
+    "build": "node build/build.js work/FAACIFP18 out"
+  },
+  "engines": { "node": ">=18" }
+}

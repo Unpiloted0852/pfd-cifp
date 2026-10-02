@@ -1,0 +1,113 @@
+name: Update procedures
+
+# Rebuilds the published procedure files when the FAA's 28-day cycle changes.
+#
+# Runs every day, and on most days does almost nothing: it works out which
+# cycle is in force, asks the published site which one it already has, and
+# stops if they agree. Only on the day a new cycle takes effect does it fetch
+# the CIFP, reduce it, and deploy.
+#
+# Only the built JSON is deployed. Nothing else in this repository is
+# published by this workflow.
+
+on:
+  schedule:
+    # Cycles take effect at 0901Z. A little after, and off the hour, because
+    # scheduled runs on the hour are the ones that get delayed.
+    - cron: '23 9 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Rebuild and deploy even if the published cycle is current
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.plan.outputs.deploy }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Before anything is fetched: a parser that fails its own tests must not
+      # be allowed to publish.
+      - name: Test the parser
+        run: node test/parse.test.js
+
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      - id: plan
+        name: Decide whether there is anything to do
+        env:
+          BASE_URL: ${{ steps.pages.outputs.base_url }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          read -r EFFECTIVE URL < <(node build/cycle.js)
+          echo "in force: $EFFECTIVE"
+          echo "effective=$EFFECTIVE" >> "$GITHUB_OUTPUT"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          PUBLISHED=$(curl -fsS --max-time 30 "$BASE_URL/v1/index.json" \
+            | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{console.log(JSON.parse(s).effective||"")}catch(e){console.log("")}})' \
+            || true)
+          echo "published: ${PUBLISHED:-nothing}"
+          if [ "$FORCE" = "true" ] || [ "$PUBLISHED" != "$EFFECTIVE" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "Published cycle is current; nothing to do." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Fetch the CIFP
+        if: steps.plan.outputs.deploy == 'true'
+        run: |
+          mkdir -p work
+          curl -fL --retry 4 --retry-delay 20 --max-time 300 \
+            -A 'pfd-cifp build (GitHub Actions)' \
+            -o work/cifp.zip '${{ steps.plan.outputs.url }}'
+          unzip -o -q work/cifp.zip FAACIFP18 -d work
+          ls -l work
+
+      - name: Build
+        if: steps.plan.outputs.deploy == 'true'
+        run: |
+          node build/build.js work/FAACIFP18 out | tee -a "$GITHUB_STEP_SUMMARY"
+          # The file must be the cycle that was asked for. The FAA posts the
+          # next cycle weeks early under the same naming, and a wrong date in
+          # cycle.js would otherwise publish it as current.
+          GOT=$(node -e 'console.log(require("./out/v1/index.json").effective)')
+          if [ "$GOT" != '${{ steps.plan.outputs.effective }}' ]; then
+            echo "built cycle is effective $GOT, expected ${{ steps.plan.outputs.effective }}" >&2
+            exit 1
+          fi
+
+      - name: Upload
+        if: steps.plan.outputs.deploy == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

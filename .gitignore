@@ -1,0 +1,4 @@
+out/
+work/
+node_modules/
+*.zip
