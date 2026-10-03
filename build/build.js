@@ -9,6 +9,7 @@
  *   <out>/v1/apt/<ID>.json     one airport's SIDs, STARs and approaches
  *   <out>/v1/seg/<lat>_<lon>.json   every procedure leg crossing that one-degree cell
  *   <out>/v1/airspace.json     Class B, C and D airspace, as outlines
+ *   <out>/v1/sua.json          special use airspace, the same
  *
  * The "v1" is the FORMAT version, not the data cycle. An extension already
  * installed keeps asking for v1, so a change that would break it goes to v2
@@ -222,7 +223,20 @@ function build(src, outDir, opts) {
       return [x.c, x.n, x.lo, x.loRef, x.hi, x.hiRef, flat];
     }) });
   fs.writeFileSync(path.join(root, 'airspace.json'), airBody);
-  return { air: air.length, airBytes: airBody.length, index: index, stats: res.stats, bytes: bytes,
+
+  // Special use airspace, the same way and in the same shape: the class is
+  // P prohibited, R restricted, W warning, M military operations area,
+  // A alert, U the rest. A floor or ceiling of null is no limit.
+  var sua = airspace.sua(text);
+  var suaBody = JSON.stringify({ v: FORMAT, c: res.cycle, effective: res.effective, b: built,
+    src: 'FAA CIFP, public domain. Not for navigation.',
+    a: sua.map(function (x) {
+      var flat = [];
+      x.p.forEach(function (p) { flat.push(r4(p[0]), r4(p[1])); });
+      return [x.c, x.n, x.lo, x.loRef, x.hi, x.hiRef, flat];
+    }) });
+  fs.writeFileSync(path.join(root, 'sua.json'), suaBody);
+  return { sua: sua.length, suaBytes: suaBody.length, air: air.length, airBytes: airBody.length, index: index, stats: res.stats, bytes: bytes,
            segBytes: segBytes, segMax: segMax, cells: cellKeys.length };
 }
 
@@ -240,6 +254,7 @@ if (require.main === module) {
   console.log(r.stats.airways + ' airway strings, ' + r.stats.airwayLegs + ' airway legs');
   console.log((r.bytes / 1048576).toFixed(1) + ' MB of airport files');
   console.log(r.air + ' pieces of Class B, C and D airspace, ' + Math.round(r.airBytes / 1024) + ' kB');
+  console.log(r.sua + ' pieces of special use airspace, ' + Math.round(r.suaBytes / 1024) + ' kB');
   console.log(r.cells + ' cells, ' + (r.segBytes / 1048576).toFixed(1) + ' MB of leg files, largest ' +
               Math.round(r.segMax / 1024) + ' kB');
 }

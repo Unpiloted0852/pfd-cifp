@@ -46,16 +46,25 @@ function limit(s, unit) {
 }
 
 var CLASS = { T: 'B', A: 'C', Z: 'D' };
+// Special use airspace, the UR records: Alert, MOA, Prohibited, Restricted,
+// Warning, and U — which the FAA uses for national security areas and the like.
+var SUA = { A: 'A', M: 'M', P: 'P', R: 'R', W: 'W', U: 'U' };
 
-function airspace(text) {
+/*
+ * Every piece of one section of the file, walked into a closed outline.
+ * `needLimits`: a piece with no floor or ceiling given is dropped (controlled
+ * airspace always has both); otherwise a missing one is null — a restricted
+ * area that goes up for ever says UNLTD.
+ */
+function walk(text, section, kinds, needLimits) {
   var lines = text.split(/\r?\n/), groups = Object.create(null), order = [];
   for (var i = 0; i < lines.length; i++) {
     var l = lines[i];
-    if (l.length < 132 || l.substr(0, 1) !== 'S' || l.substr(4, 2) !== 'UC') continue;
+    if (l.length < 132 || l.substr(0, 1) !== 'S' || l.substr(4, 2) !== section) continue;
     if (col(l, 25, 25) > '1') continue;                    // continuation: nothing this reads
-    var cls = CLASS[col(l, 9, 9)];
+    var cls = kinds[col(l, 9, 9)];
     if (!cls) continue;
-    var key = col(l, 7, 20);                               // region, type, centre, class, which piece
+    var key = col(l, 7, 20);                               // region, type, name or centre, which piece
     if (!groups[key]) { groups[key] = { cls: cls, recs: [] }; order.push(key); }
     groups[key].recs.push({
       seq: +col(l, 21, 24), via: col(l, 31, 31), end: col(l, 32, 32) === 'E',
@@ -70,7 +79,7 @@ function airspace(text) {
   order.forEach(function (key) {
     var g = groups[key], recs = g.recs.sort(function (a, b) { return a.seq - b.seq; });
     var first = recs[0], pts = [];
-    if (!first.lo || !first.hi) return;                    // no floor or ceiling: not something to draw
+    if (needLimits && (!first.lo || !first.hi)) return;    // no floor or ceiling: not something to draw
     function push(p) { if (p[0] != null && p[1] != null) pts.push([r5(p[0]), r5(p[1])]); }
     for (var k = 0; k < recs.length; k++) {
       var r = recs[k];
@@ -100,9 +109,22 @@ function airspace(text) {
     if (pts.length < 3) return;
     var p0 = pts[0], pn = pts[pts.length - 1];
     if (p0[0] !== pn[0] || p0[1] !== pn[1]) pts.push([p0[0], p0[1]]);
-    out.push({ c: g.cls, n: first.name, lo: first.lo.ft, loRef: first.lo.ref, hi: first.hi.ft, hiRef: first.hi.ref, p: pts });
+    out.push({ c: g.cls, n: first.name || col2name(key),
+               lo: first.lo ? first.lo.ft : null, loRef: first.lo ? first.lo.ref : null,
+               hi: first.hi ? first.hi.ft : null, hiRef: first.hi ? first.hi.ref : null, p: pts });
   });
   return out;
 }
+// A piece with no name of its own goes by its designation, from its key.
+function col2name(key) { return key.substr(3, 10).trim(); }
 
-module.exports = { airspace: airspace, limit: limit };
+function airspace(text) { return walk(text, 'UC', CLASS, true); }
+
+/*
+ *   sua(text) -> the same, for special use airspace: c is 'P' prohibited,
+ *   'R' restricted, 'W' warning, 'M' military operations area, 'A' alert,
+ *   'U' the rest (national security areas). lo or hi may be null: no limit.
+ */
+function sua(text) { return walk(text, 'UR', SUA, false); }
+
+module.exports = { airspace: airspace, sua: sua, limit: limit };

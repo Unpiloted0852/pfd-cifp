@@ -41,5 +41,21 @@ const yxx = by('LYNDEN - ABBOTSFORD')[0];   // the first of its two pieces
 ok('an outline of lines and one arc', !!yxx && yxx.p.length > 6 && yxx.p.length < 40, yxx ? yxx.p.length + ' points' : '');
 ok('nothing strays from where it began', air.every(x => x.p.every(p => nm(x.p[0], p) < 40)));
 
+console.log('\nspecial use airspace');
+// Real records again: Alert Area 680 (a circle), Boardman MOA, Prohibited
+// Areas 40 and 56 (two pieces), Restricted 6714H (cut by an arc), Warning 237A.
+const sua = A.sua(fs.readFileSync(path.join(__dirname, 'fixtures', 'sua-2610.txt'), 'latin1'));
+const kind = k => sua.filter(x => x.c === k);
+ok('every piece in the fixture', sua.length === 7, sua.map(x => x.c + ' ' + x.n).join(', '));
+ok('each kind is told apart', kind('A').length === 1 && kind('M').length === 1 && kind('P').length === 3 && kind('R').length === 1 && kind('W').length === 1);
+ok('they go by their names', kind('M')[0].n === 'BOARDMAN MOA' && kind('A')[0].n === 'A-680' && kind('R')[0].n === 'R-6714H');
+ok('a continuation record is not a point on the edge', kind('M')[0].p.every(p => p[0] > 45 && p[0] < 46.5));
+ok('floors and ceilings', kind('M')[0].lo === 4000 && kind('M')[0].hi === 17999 && kind('A')[0].lo === 0 && kind('A')[0].loRef === 'A' && kind('A')[0].hi === 3000);
+ok('every outline is closed', sua.every(x => x.p.length >= 4 && x.p[0][0] === x.p[x.p.length - 1][0] && x.p[0][1] === x.p[x.p.length - 1][1]));
+const a680 = kind('A')[0], c680 = [48 + 10 / 60 + 59 / 3600, -(122 + 38 / 60 + 5 / 3600)], r680 = a680.p.map(p => nm(c680, p));
+ok('a circle is a circle', Math.max(...r680) < 3.02 && Math.min(...r680) > 2.98, 'published 3.0 nm');
+ok('an arc is walked', kind('R')[0].p.length > 12, kind('R')[0].p.length + ' points');
+ok('controlled airspace is not in it, nor it in controlled airspace', !sua.some(x => /^[BCD]$/.test(x.c)) && !air.some(x => /^[PRWMAU]$/.test(x.c) && x.c !== 'B' && x.c !== 'C' && x.c !== 'D'));
+
 console.log(failed ? '\n' + failed + ' FAILED\n' : '\nall airspace checks passed\n');
 process.exit(failed ? 1 : 0);

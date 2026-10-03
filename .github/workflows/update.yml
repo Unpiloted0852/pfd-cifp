@@ -72,8 +72,8 @@ jobs:
             || true)
           echo "published: ${PUBLISHED:-nothing}"
           # A file added to the build since the last deploy is not there yet.
-          AIRSPACE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$BASE_URL/v1/airspace.json" || true)
-          echo "airspace file: $AIRSPACE"
+          AIRSPACE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$BASE_URL/v1/sua.json" || true)
+          echo "newest file (sua.json): $AIRSPACE"
           if [ "$FORCE" = "true" ] || [ "$PUBLISHED" != "$EFFECTIVE" ] || [ "$AIRSPACE" != "200" ]; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           else
