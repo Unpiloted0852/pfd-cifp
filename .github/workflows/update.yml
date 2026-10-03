@@ -7,18 +7,15 @@ name: Update procedures
 # stops if they agree. Only on the day a new cycle takes effect does it fetch
 # the CIFP, reduce it, and deploy.
 #
-# The same run works out where the charts that carry no georeferencing
-# belong (build/place/), and publishes that beside the procedures.
-#
 # Only the built JSON is deployed. Nothing else in this repository is
 # published by this workflow.
 
 on:
-  # A change to the build is tried at once. It deploys only if something
-  # published is out of date or missing, like any other run.
+  # TEMPORARY, removed by the next commit: one run on this push, to take the
+  # withdrawn chart placements (v1/place/) off the published site.
   push:
     branches: [main]
-    paths: ['build/**', 'package.json', 'package-lock.json', '.github/workflows/update.yml']
+    paths: ['.github/workflows/update.yml']
   schedule:
     # Cycles take effect at 0901Z. A little after, and off the hour, because
     # scheduled runs on the hour are the ones that get delayed.
@@ -54,8 +51,8 @@ jobs:
 
       # Before anything is fetched: a parser that fails its own tests must not
       # be allowed to publish.
-      - name: Test the parser and the placement rules
-        run: node test/parse.test.js && node test/place.test.js
+      - name: Test the parser
+        run: node test/parse.test.js
 
       - id: pages
         uses: actions/configure-pages@v5
@@ -74,15 +71,8 @@ jobs:
             | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{console.log(JSON.parse(s).effective||"")}catch(e){console.log("")}})' \
             || true)
           echo "published: ${PUBLISHED:-nothing}"
-          # The chart placements are published beside the procedures and go
-          # by the chart cycle's number; the two cycles turn over together.
-          PLACED=$(curl -fsS --max-time 30 "$BASE_URL/v1/place/index.json" \
-            | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{console.log(JSON.parse(s).cycle||"")}catch(e){console.log("")}})' \
-            || true)
-          WANT=$(node -e 'const e=process.argv[1];const y=+e.slice(0,4);let n=0;for(let t=Date.parse(e+"T00:00:00Z");new Date(t).getUTCFullYear()===y;t-=28*86400000)n++;console.log(String(y%100).padStart(2,"0")+String(n).padStart(2,"0"))' "$EFFECTIVE")
-          echo "chart cycle: $WANT, placements published: ${PLACED:-none}"
-          echo "charts=$WANT" >> "$GITHUB_OUTPUT"
-          if [ "$FORCE" = "true" ] || [ "$PUBLISHED" != "$EFFECTIVE" ] || [ "$PLACED" != "$WANT" ]; then
+          PLACED=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$BASE_URL/v1/place/index.json" || true)
+          if [ "$FORCE" = "true" ] || [ "$PUBLISHED" != "$EFFECTIVE" ] || [ "$PLACED" = "200" ]; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           else
             echo "deploy=false" >> "$GITHUB_OUTPUT"
@@ -111,24 +101,6 @@ jobs:
             echo "built cycle is effective $GOT, expected ${{ steps.plan.outputs.effective }}" >&2
             exit 1
           fi
-
-      # Where the charts with no georeferencing belong: the Department of
-      # Defense's plates and the charted visual procedures, and only those.
-      # About twelve hundred charts and an hour or two, nearly all of it OCR.
-      # If it fails the procedures are still published; the placements are
-      # then missing, and the next day's run sees that and tries again.
-      - name: Place the charts that carry no georeferencing
-        if: steps.plan.outputs.deploy == 'true'
-        continue-on-error: true
-        timeout-minutes: 300
-        run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr
-          npm ci
-          curl -fL --retry 4 --retry-delay 20 --max-time 300 \
-            -A 'pfd-cifp build (GitHub Actions)' \
-            -o work/meta.xml 'https://aeronav.faa.gov/d-tpp/${{ steps.plan.outputs.charts }}/xml_data/d-TPP_Metafile.xml'
-          node build/place/run.js --cifp work/FAACIFP18 --meta work/meta.xml --out out --pdf work/pdf --jobs 4 \
-            | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Upload
         if: steps.plan.outputs.deploy == 'true'

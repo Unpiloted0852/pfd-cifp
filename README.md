@@ -16,16 +16,13 @@ aircraft.
 ## What runs, and when
 
 `.github/workflows/update.yml` runs daily. On most days it compares the cycle
-in force with the one already published and stops. It also runs when the
-build itself is changed. On the day a new cycle
+in force with the one already published and stops. On the day a new cycle
 takes effect it:
 
 1. runs the parser's tests,
 2. downloads that cycle's `CIFP_YYMMDD.zip` from `aeronav.faa.gov`,
 3. builds `out/v1/` and checks the result is the cycle it asked for,
-4. places the charts that carry no georeferencing (below); if that fails the
-   rest is still published, and the next day's run tries again,
-5. deploys `out/` to GitHub Pages.
+4. deploys `out/` to GitHub Pages.
 
 Only the JSON in `out/` is deployed. After a deploy it commits a one-line
 `PUBLISHED` file naming the cycle — a record, and the activity that stops
@@ -33,53 +30,6 @@ GitHub switching off the schedule in a quiet public repository.
 
 It can also be run by hand from the Actions tab, with **force** to rebuild a
 cycle that is already published.
-
-## Charts with no georeferencing
-
-The FAA's own approach plates say where they belong on the earth. The plates
-the Department of Defense draws, and the charted visual procedures, do not, so
-the extension cannot lay them on the map. `build/place/` works out where they
-go, in the same run, and publishes the answer as `v1/place/index.json`.
-
-**Only those charts are touched.** `dtpp.js` picks them from the FAA's chart
-list — a military field, a chart not marked civil, a visual — and `place.js`
-looks inside each and leaves it alone if it is georeferenced after all. About
-1,200 charts a cycle; the other 10,000 are never fetched.
-
-How: read the fix names on the page (the PDF's text, and Tesseract), find what
-marks each fix — a waypoint symbol, a tick across the track (`snap.js`) — and
-fit the page to the fixes' positions in the CIFP (`plate-fix.js`).
-
-A placement is published only when it is sure:
-
-- four fixes agreeing within a point, with breadth across the chart that does
-  not hang on any one of them; or five along one line if four are marked by
-  symbols rather than ticks (a row of ticks can be slid along the track);
-- a navaid never counts toward the number;
-- the chart north-up within 0.6 degrees;
-- and the airport, where the fit puts it, inside the plan view (an inset is a
-  little map of its own and agrees with itself perfectly).
-
-Measured on FAA plates whose true position is known, by pretending they were
-not georeferenced (`node build/place/run.js --validate KDEN,KORD ...`): 1,106
-plates at 54 airports, 461 placed (42%), median 0.03 nm out at the airport,
-none more than 0.25 nm. The last 290 of those were never looked at while the
-rules were being settled: 147 placed, worst 0.13 nm. What is not placed is
-mostly straight-in approaches whose few fixes lie along the final.
-
-`index.json` under `place/`:
-
-| field | meaning |
-|---|---|
-| `cycle` | the chart cycle these were made from, e.g. `"2610"`; a placement is for that cycle's drawing only |
-| `charts` | by PDF file name, lower case |
-| `c` | latitude and longitude of the PAGE's corners: top-left, top-right, bottom-right, bottom-left |
-| `w`, `h` | the page's size in points |
-| `box` | the plan view, `[x0, y0, x1, y1]` in points from the top left |
-| `n` | how many fixes agreed |
-
-Needs `tesseract` on the path and `npm ci` (pdf.js and a canvas). The parser
-and its tests need neither.
 
 ## What is published
 
