@@ -117,3 +117,5 @@ Then run the workflow once from the Actions tab.
 
 In every one of those cases the site keeps serving the last good cycle, and
 the extension marks it as out of date once it passes its `expires` day.
+
+Coffee: https://ko-fi.com/unpiloted0852
