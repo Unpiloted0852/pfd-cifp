@@ -8,6 +8,7 @@
  *   <out>/v1/index.json        cycle, dates, and every airport covered with its position
  *   <out>/v1/apt/<ID>.json     one airport's SIDs, STARs and approaches
  *   <out>/v1/seg/<lat>_<lon>.json   every procedure leg crossing that one-degree cell
+ *   <out>/v1/airspace.json     Class B, C and D airspace, as outlines
  *
  * The "v1" is the FORMAT version, not the data cycle. An extension already
  * installed keeps asking for v1, so a change that would break it goes to v2
@@ -18,6 +19,7 @@
 var fs = require('fs');
 var path = require('path');
 var cifp = require('./cifp-parse.js');
+var airspace = require('./airspace.js');
 
 var FORMAT = 1;
 
@@ -121,7 +123,8 @@ function build(src, outDir, opts) {
   // file it fetched from the earlier build.
   var built = (opts && opts.built) || new Date().toISOString();
   var minAirports = (opts && typeof opts.minAirports === 'number') ? opts.minAirports : 2000;
-  var res = cifp.parse(fs.readFileSync(src, 'latin1'));
+  var text = fs.readFileSync(src, 'latin1');
+  var res = cifp.parse(text);
   if (!res.cycle || !res.effective) throw new Error('no cycle header found in ' + src);
 
   var ids = Object.keys(res.airports).sort();
@@ -202,7 +205,24 @@ function build(src, outDir, opts) {
     cells: cellKeys
   };
   fs.writeFileSync(path.join(root, 'index.json'), JSON.stringify(index));
-  return { index: index, stats: res.stats, bytes: bytes,
+
+  /*
+   * Class B, C and D airspace, as outlines: one file for the country, for the
+   * extension to lay on the map when asked. Each piece is
+   *   [class, name, floor ft, 'M'|'A', ceiling ft, 'M'|'A', [lat, lon, lat, lon, ...]]
+   * with M above sea level and A above the ground. A new file beside the
+   * others, so nothing an installed extension reads has changed.
+   */
+  var air = airspace.airspace(text);
+  var airBody = JSON.stringify({ v: FORMAT, c: res.cycle, effective: res.effective, b: built,
+    src: 'FAA CIFP, public domain. Not for navigation.',
+    a: air.map(function (x) {
+      var flat = [];
+      x.p.forEach(function (p) { flat.push(r4(p[0]), r4(p[1])); });
+      return [x.c, x.n, x.lo, x.loRef, x.hi, x.hiRef, flat];
+    }) });
+  fs.writeFileSync(path.join(root, 'airspace.json'), airBody);
+  return { air: air.length, airBytes: airBody.length, index: index, stats: res.stats, bytes: bytes,
            segBytes: segBytes, segMax: segMax, cells: cellKeys.length };
 }
 
@@ -219,6 +239,7 @@ if (require.main === module) {
               r.stats.legs + ' legs, ' + r.stats.unresolved + ' fixes unresolved');
   console.log(r.stats.airways + ' airway strings, ' + r.stats.airwayLegs + ' airway legs');
   console.log((r.bytes / 1048576).toFixed(1) + ' MB of airport files');
+  console.log(r.air + ' pieces of Class B, C and D airspace, ' + Math.round(r.airBytes / 1024) + ' kB');
   console.log(r.cells + ' cells, ' + (r.segBytes / 1048576).toFixed(1) + ' MB of leg files, largest ' +
               Math.round(r.segMax / 1024) + ' kB');
 }

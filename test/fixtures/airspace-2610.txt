@@ -1,0 +1,62 @@
+SUSAUCK1AKBOI PAC  A00100     CE                   N43335170W1161322300050       GND  A06900MBOISE                         584392407
+SUSAUCK1AKBOI PAC  B00200     R N43322737W115594540N43335170W11613223001000980   04600M06900MBOISE                         584402407
+SUSAUCK1AKBOI PAC  B00300     G N43235242W116140537                                                                        584412407
+SUSAUCK1AKBOI PAC  B00400     L N43285206W116134386N43335170W11613223000501830                                             584422407
+SUSAUCK1AKBOI PAC  B00500     GEN43330973W116063377                                                                        584432407
+SUSAUCK1AKBOI PAC  C00600     L N43384517W116144820N43335170W11613223000503480   04200M06900MBOISE                         584442407
+SUSAUCK1AKBOI PAC  C00700     G N43285206W116134386                                                                        584452407
+SUSAUCK1AKBOI PAC  C00800     R N43235242W116140537N43335170W11613223001001830                                             584462407
+SUSAUCK1AKBOI PAC  C00900     GEN43433863W116161434                                                                        584472407
+SUSAUCK1AKBOI PAC  D01000     L N43384881W116122479N43335170W11613223000500080   05200M06900MBOISE                         584482407
+SUSAUCK1AKBOI PAC  D01100     G N43384517W116144820                                                                        584492407
+SUSAUCK1AKBOI PAC  D01200     R N43433863W116161434N43335170W11613223001003480                                             584502407
+SUSAUCK1AKBOI PAC  D01300     GEN43434592W116112713                                                                        584512407
+SUSAUCK1ZCYXX PAD  A00100     H N49000500W122335000                              GND  A02500MLYNDEN - ABBOTSFORD           587982502
+SUSAUCK1ZCYXX PAD  A00200     R N49000500W122160768N49013100W12221480000401110                                             587992502
+SUSAUCK1ZCYXX PAD  A00300     H N48575900W122185766                                                                        588002502
+SUSAUCK1ZCYXX PAD  A00400     GEN48575900W122335000                                                                        588011703
+SUSAUCK1ZCYXX PAD  B00500     H N48575900W122335000                              01500M02500MLYNDEN - ABBOTSFORD           588022502
+SUSAUCK1ZCYXX PAD  B00600     L N48575900W122471254N49044500W12309140001601149                                             588032504
+SUSAUCK1ZCYXX PAD  B00700     H N49000500W122455849                                                                        588042504
+SUSAUCK1ZCYXX PAD  B00800     GEN49000500W122335000                                                                        588052502
+SUSAUCK2TKSFO PAB  A00100     G N37414000W122291100                              GND  A10000MSAN FRANCISCO AREA A          618521809
+SUSAUCK2TKSFO PAB  A00200     G N37423200W122280700                                                                        618531809
+SUSAUCK2TKSFO PAB  A00300     G N37430800W122270500                                                                        618541809
+SUSAUCK2TKSFO PAB  A00400     G N37433100W122261000                                                                        618551809
+SUSAUCK2TKSFO PAB  A00500     G N37435200W122250400                                                                        618561809
+SUSAUCK2TKSFO PAB  A00600     G N37440400W122240500                                                                        618571809
+SUSAUCK2TKSFO PAB  A00700     G N37441000W122230300                                                                        618581809
+SUSAUCK2TKSFO PAB  A00800     G N37441000W122215300                                                                        618591809
+SUSAUCK2TKSFO PAB  A00900     G N37440300W122204300                                                                        618601809
+SUSAUCK2TKSFO PAB  A01000     G N37435200W122194900                                                                        618611809
+SUSAUCK2TKSFO PAB  A01100     G N37433700W122185900                                                                        618621809
+SUSAUCK2TKSFO PAB  A01200     G N37424000W122164300                                                                        618631809
+SUSAUCK2TKSFO PAB  A01300     G N37402100W122141200                                                                        618641809
+SUSAUCK2TKSFO PAB  A01400     G N37353200W122140600                                                                        618651809
+SUSAUCK2TKSFO PAB  A01500     G N37335300W122144900                                                                        618661809
+SUSAUCK2TKSFO PAB  A01600     G N37330000W122152400                                                                        618671809
+SUSAUCK2TKSFO PAB  A01700     G N37333900W122165500                                                                        618681809
+SUSAUCK2TKSFO PAB  A01800     G N37333800W122174800                                                                        618691809
+SUSAUCK2TKSFO PAB  A01900     G N37325700W122202500                                                                        618701809
+SUSAUCK2TKSFO PAB  A02000     G N37325400W122222000                                                                        618711809
+SUSAUCK2TKSFO PAB  A02100     G N37330800W122223600                                                                        618721809
+SUSAUCK2TKSFO PAB  A02200     G N37333600W122225800                                                                        618731809
+SUSAUCK2TKSFO PAB  A02300     G N37335600W122231900                                                                        618741809
+SUSAUCK2TKSFO PAB  A02400     G N37340100W122233400                                                                        618751809
+SUSAUCK2TKSFO PAB  A02500     G N37341700W122235000                                                                        618761809
+SUSAUCK2TKSFO PAB  A02600     G N37342900W122240100                                                                        618771809
+SUSAUCK2TKSFO PAB  A02700     G N37350000W122241700                                                                        618781809
+SUSAUCK2TKSFO PAB  A02800     G N37360900W122253600                                                                        618791809
+SUSAUCK2TKSFO PAB  A02900     G N37362200W122254200                                                                        618801809
+SUSAUCK2TKSFO PAB  A03000     G N37364200W122253400                                                                        618811809
+SUSAUCK2TKSFO PAB  A03100     G N37382600W122294100                                                                        618821809
+SUSAUCK2TKSFO PAB  A03200     G N37392500W122294100                                                                        618831809
+SUSAUCK2TKSFO PAB  A03300     G N37403200W122294400                                                                        618841809
+SUSAUCK2TKSFO PAB  A03400     GEN37410800W122294600                                                                        618851809
+SUSAUCK2TKSFO PAB  B03500     G N37353200W122140600                              01500M10000MSAN FRANCISCO AREA B          618861809
+SUSAUCK2TKSFO PAB  B03600     G N37351100W122111300                                                                        618871809
+SUSAUCK2TKSFO PAB  B03700     G N37324900W122121500                                                                        618881809
+SUSAUCK2TKSFO PAB  B03800     G N37312900W122130800                                                                        618891809
+SUSAUCK2TKSFO PAB  B03900     G N37330000W122152400                                                                        618901809
+SUSAUCK2TKSFO PAB  B04000     GEN37335300W122144900                                                                        618911809
+SUSAUCK2ZKSUU PAD  A00100     CE                   N38154600W1215539000043       GND  A02600MFAIRFIELD                     628681703

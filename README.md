@@ -36,6 +36,12 @@ cycle that is already published.
     v1/index.json       the cycle, its dates, and every airport covered
     v1/apt/KPDX.json    one airport's approaches, SIDs and STARs
     v1/seg/45_-123.json every procedure leg crossing one one-degree cell
+    v1/airspace.json    Class B, C and D airspace, as outlines
+
+`airspace.json` is one file for the country: `a` is a list of pieces, each
+`[class, name, floor ft, "M"|"A", ceiling ft, "M"|"A", [lat, lon, lat, lon, ...]]`
+— `M` above mean sea level, `A` above the ground. A Class B is many pieces, one
+per layer. The CIFP has no TRSAs, so neither does this.
 
 `v1` is the **format** version. An installed extension keeps asking for `v1`,
 so a change that would break it must be published as `v2` beside it.

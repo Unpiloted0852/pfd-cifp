@@ -11,6 +11,11 @@ name: Update procedures
 # published by this workflow.
 
 on:
+  # A change to the build is tried at once. It deploys only if something
+  # published is out of date or missing, like any other run.
+  push:
+    branches: [main]
+    paths: ['build/**', '.github/workflows/update.yml']
   schedule:
     # Cycles take effect at 0901Z. A little after, and off the hour, because
     # scheduled runs on the hour are the ones that get delayed.
@@ -47,7 +52,7 @@ jobs:
       # Before anything is fetched: a parser that fails its own tests must not
       # be allowed to publish.
       - name: Test the parser
-        run: node test/parse.test.js
+        run: node test/parse.test.js && node test/airspace.test.js
 
       - id: pages
         uses: actions/configure-pages@v5
@@ -66,7 +71,10 @@ jobs:
             | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{console.log(JSON.parse(s).effective||"")}catch(e){console.log("")}})' \
             || true)
           echo "published: ${PUBLISHED:-nothing}"
-          if [ "$FORCE" = "true" ] || [ "$PUBLISHED" != "$EFFECTIVE" ]; then
+          # A file added to the build since the last deploy is not there yet.
+          AIRSPACE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$BASE_URL/v1/airspace.json" || true)
+          echo "airspace file: $AIRSPACE"
+          if [ "$FORCE" = "true" ] || [ "$PUBLISHED" != "$EFFECTIVE" ] || [ "$AIRSPACE" != "200" ]; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           else
             echo "deploy=false" >> "$GITHUB_OUTPUT"
