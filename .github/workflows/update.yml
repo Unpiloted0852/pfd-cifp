@@ -11,11 +11,6 @@ name: Update procedures
 # published by this workflow.
 
 on:
-  # TEMPORARY, removed by the next commit: one run on this push, to take the
-  # withdrawn chart placements (v1/place/) off the published site.
-  push:
-    branches: [main]
-    paths: ['.github/workflows/update.yml']
   schedule:
     # Cycles take effect at 0901Z. A little after, and off the hour, because
     # scheduled runs on the hour are the ones that get delayed.
@@ -71,8 +66,7 @@ jobs:
             | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{console.log(JSON.parse(s).effective||"")}catch(e){console.log("")}})' \
             || true)
           echo "published: ${PUBLISHED:-nothing}"
-          PLACED=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$BASE_URL/v1/place/index.json" || true)
-          if [ "$FORCE" = "true" ] || [ "$PUBLISHED" != "$EFFECTIVE" ] || [ "$PLACED" = "200" ]; then
+          if [ "$FORCE" = "true" ] || [ "$PUBLISHED" != "$EFFECTIVE" ]; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           else
             echo "deploy=false" >> "$GITHUB_OUTPUT"
