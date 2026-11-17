@@ -266,14 +266,17 @@ function build(src, outDir, opts) {
     var rd = function (n) { var f = path.join(worldDir, n); return fs.existsSync(f) ? fs.readFileSync(f, 'utf8') : null; };
     var wfix = rd('FIX_BASE.csv'), wapt = rd('airports.csv'), wnav = rd('navaids.csv');
     if (!wfix || !wapt || !wnav) throw new Error('world data incomplete in ' + worldDir);
-    var w = worldData.world(wfix, wapt, wnav, res.nav);
+    var awyNames = Object.create(null);
+    res.airways.forEach(function (x) { awyNames[x.name] = 1; });
+    var w = worldData.world(wfix, wapt, wnav, res.nav, rd('fix.dat'), rd('awy.dat'), awyNames);
     // As with the CIFP, a truncated download must not publish a thin file.
     if (w.stats.fixes < 30000 || w.stats.airports < 20000 || w.stats.navaids < 3000) {
       throw new Error('world data looks partial: ' + JSON.stringify(w.stats));
     }
     var worldBody = JSON.stringify({ v: FORMAT, c: res.cycle, effective: res.effective, b: built,
-      src: 'FAA NASR (public domain) and OurAirports (public domain). Not for navigation.',
-      p: w.p, a: w.a });
+      src: 'FAA NASR (public domain), OurAirports (public domain); o/ow: FlightGear navdata, ' +
+        '(c) 2013 Robin A. Peel, GPL v2 or later, cycle 2013.10. Not for navigation.',
+      p: w.p, a: w.a, o: w.o, ow: w.ow });
     fs.writeFileSync(path.join(root, 'world.json'), worldBody);
     worldInfo = { stats: w.stats, bytes: worldBody.length };
   }
@@ -299,6 +302,7 @@ if (require.main === module) {
   console.log(r.navPoints + ' en-route points by name, ' + Math.round(r.navBytes / 1024) + ' kB');
   if (r.world) console.log('world.json: ' + r.world.stats.fixes + ' NASR fixes, ' + r.world.stats.navaids +
     ' foreign navaids, ' + r.world.stats.airports + ' airports (' + r.world.stats.airportCodes + ' codes), ' +
+    r.world.stats.oldFixes + ' 2013 fixes, ' + r.world.stats.oldAirwaySegs + ' 2013 airway segments, ' +
     Math.round(r.world.bytes / 1024) + ' kB');
   console.log(r.cells + ' cells, ' + (r.segBytes / 1048576).toFixed(1) + ' MB of leg files, largest ' +
               Math.round(r.segMax / 1024) + ' kB');

@@ -104,6 +104,12 @@ jobs:
             curl -fL --retry 4 --retry-delay 20 --max-time 300 \
               -o work/world/$f.csv "https://davidmegginson.github.io/ourairports-data/$f.csv"
           done
+          # FlightGear's worldwide waypoints and airways (2013, GPL), a last fallback.
+          for f in fix awy; do
+            curl -fL --retry 4 --retry-delay 20 --max-time 300 \
+              -o work/world/$f.dat.gz "https://gitlab.com/flightgear/fgdata/-/raw/next/Navaids/$f.dat.gz"
+            gunzip -f work/world/$f.dat.gz
+          done
           ls -l work/world
 
       - name: Build
