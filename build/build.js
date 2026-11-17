@@ -10,6 +10,7 @@
  *   <out>/v1/seg/<lat>_<lon>.json   every procedure leg crossing that one-degree cell
  *   <out>/v1/airspace.json     Class B, C and D airspace, as outlines
  *   <out>/v1/sua.json          special use airspace, the same
+ *   <out>/v1/nav.json          en-route waypoints, navaids and airways by name
  *
  * The "v1" is the FORMAT version, not the data cycle. An extension already
  * installed keeps asking for v1, so a change that would break it goes to v2
@@ -236,7 +237,26 @@ function build(src, outDir, opts) {
       return [x.c, x.n, x.lo, x.loRef, x.hi, x.hiRef, flat];
     }) });
   fs.writeFileSync(path.join(root, 'sua.json'), suaBody);
-  return { sua: sua.length, suaBytes: suaBody.length, air: air.length, airBytes: airBody.length, index: index, stats: res.stats, bytes: bytes,
+
+  /*
+   * En-route points and airways BY NAME, for turning a filed route such as
+   * "KMSP.SNUPE1.DLL.J34.BAE..ETG.MIP4.KLGA" into positions. The cell files
+   * answer "what is near here"; this answers "where is DLL". An identifier
+   * can name more than one point (in different regions), so a reader picks
+   * the one nearest the route it is building.
+   *   p: [id, lat, lon, kind(, declination)]  kind V VHF navaid, N NDB, W waypoint
+   *   w: [airway, [id, lat, lon, id, lat, lon, ...]]  in airway order
+   */
+  var navBody = JSON.stringify({ v: FORMAT, c: res.cycle, effective: res.effective, b: built,
+    src: 'FAA CIFP, public domain. Not for navigation.',
+    p: res.nav.map(function (n) { var o = [n[0], r4(n[1]), r4(n[2]), n[3]]; if (n.length > 4) o.push(n[4]); return o; }),
+    w: res.airways.map(function (a) {
+      var flat = [];
+      a.pts.forEach(function (p) { flat.push(p[0], r4(p[1]), r4(p[2])); });
+      return [a.name, flat];
+    }) });
+  fs.writeFileSync(path.join(root, 'nav.json'), navBody);
+  return { navBytes: navBody.length, navPoints: res.nav.length, sua: sua.length, suaBytes: suaBody.length, air: air.length, airBytes: airBody.length, index: index, stats: res.stats, bytes: bytes,
            segBytes: segBytes, segMax: segMax, cells: cellKeys.length };
 }
 
@@ -255,6 +275,7 @@ if (require.main === module) {
   console.log((r.bytes / 1048576).toFixed(1) + ' MB of airport files');
   console.log(r.air + ' pieces of Class B, C and D airspace, ' + Math.round(r.airBytes / 1024) + ' kB');
   console.log(r.sua + ' pieces of special use airspace, ' + Math.round(r.suaBytes / 1024) + ' kB');
+  console.log(r.navPoints + ' en-route points by name, ' + Math.round(r.navBytes / 1024) + ' kB');
   console.log(r.cells + ' cells, ' + (r.segBytes / 1048576).toFixed(1) + ' MB of leg files, largest ' +
               Math.round(r.segMax / 1024) + ' kB');
 }

@@ -38,6 +38,7 @@ cycle that is already published.
     v1/seg/45_-123.json every procedure leg crossing one one-degree cell
     v1/airspace.json    Class B, C and D airspace, as outlines
     v1/sua.json         special use airspace, as outlines
+    v1/nav.json         en-route waypoints, navaids and airways, by name
 
 `airspace.json` is one file for the country: `a` is a list of pieces, each
 `[class, name, floor ft, "M"|"A", ceiling ft, "M"|"A", [lat, lon, lat, lon, ...]]`
@@ -51,6 +52,14 @@ is no limit.
 
 `v1` is the **format** version. An installed extension keeps asking for `v1`,
 so a change that would break it must be published as `v2` beside it.
+
+`nav.json` is for turning a filed route (`KMSP.SNUPE1.DLL.J34.BAE..ETG.MIP4.KLGA`)
+into positions. `p` is every en-route point as `[id, lat, lon, kind]`, where
+kind is `V` VHF navaid (followed by its station declination, east positive,
+for fix-radial-distance points), `N` NDB or `W` waypoint. An identifier can
+name more than one point in different regions; take the one nearest the route.
+`w` is every airway as `[name, [id, lat, lon, id, lat, lon, ...]]`, in order;
+an airway broken by a gap in the data appears as more than one entry.
 
 `index.json`:
 

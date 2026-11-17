@@ -165,6 +165,10 @@ function parse(text) {
   var cycle = null, effective = null;
   var fixes = Object.create(null);       // "sec|icao|airport|id" -> [lat, lon]
   var airports = Object.create(null);
+  // En-route points by name, for expanding a filed route: [id, lat, lon, kind]
+  // with kind V (VHF navaid, then its station declination, east positive),
+  // N (NDB) or W (waypoint).
+  var nav = [];
   var i, line;
 
   function putFix(sec, icao, apt, id, lat, lon) {
@@ -200,10 +204,18 @@ function parse(text) {
         la = parseLat(col(line, 56, 64)); lo = parseLon(col(line, 65, 74));
       }
       putFix(sub === 'B' ? 'DB' : 'D ', nicao, '', nid, la, lo);
+      if (la != null && lo != null) {
+        if (sub === 'B') nav.push([nid, round6(la), round6(lo), 'N']);
+        else {
+          var dec = parseVar(col(line, 75, 79));
+          nav.push(dec == null ? [nid, round6(la), round6(lo), 'V'] : [nid, round6(la), round6(lo), 'V', dec]);
+        }
+      }
     } else if (sec === 'E' && line[5] === 'A') {
       if (col(line, 22, 22) > '1') continue;
-      putFix('EA', col(line, 20, 21), '', col(line, 14, 18).trim(),
-             parseLat(col(line, 33, 41)), parseLon(col(line, 42, 51)));
+      var wla = parseLat(col(line, 33, 41)), wlo = parseLon(col(line, 42, 51));
+      putFix('EA', col(line, 20, 21), '', col(line, 14, 18).trim(), wla, wlo);
+      if (wla != null && wlo != null) nav.push([col(line, 14, 18).trim(), round6(wla), round6(wlo), 'W']);
     } else if (sec === 'P' && line[5] === 'N') {
       // Terminal NDBs keep their subsection in column 6, unlike every other
       // airport record, with the identifier where a navaid's would be.
@@ -351,7 +363,7 @@ function parse(text) {
     out[id] = ap;
     stats.airports++;
   });
-  return { cycle: cycle, effective: effective, airports: out, airways: airways, stats: stats };
+  return { cycle: cycle, effective: effective, airports: out, airways: airways, nav: nav, stats: stats };
 }
 
 module.exports = {
