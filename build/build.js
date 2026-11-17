@@ -2,7 +2,7 @@
 /*
  * Build the published tree from one FAACIFP18 file.
  *
- *   node build/build.js <FAACIFP18> <out-dir>
+ *   node build/build.js <FAACIFP18> <out-dir> [world-dir]
  *
  * Writes:
  *   <out>/v1/index.json        cycle, dates, and every airport covered with its position
@@ -11,6 +11,9 @@
  *   <out>/v1/airspace.json     Class B, C and D airspace, as outlines
  *   <out>/v1/sua.json          special use airspace, the same
  *   <out>/v1/nav.json          en-route waypoints, navaids and airways by name
+ *   <out>/v1/world.json        what nav.json lacks: all US fixes (NASR), foreign navaids
+ *                              and airports worldwide (OurAirports); only when
+ *                              [world-dir] holds FIX_BASE.csv, navaids.csv, airports.csv
  *
  * The "v1" is the FORMAT version, not the data cycle. An extension already
  * installed keeps asking for v1, so a change that would break it goes to v2
@@ -22,6 +25,7 @@ var fs = require('fs');
 var path = require('path');
 var cifp = require('./cifp-parse.js');
 var airspace = require('./airspace.js');
+var worldData = require('./world.js');
 
 var FORMAT = 1;
 
@@ -256,17 +260,34 @@ function build(src, outDir, opts) {
       return [a.name, flat];
     }) });
   fs.writeFileSync(path.join(root, 'nav.json'), navBody);
-  return { navBytes: navBody.length, navPoints: res.nav.length, sua: sua.length, suaBytes: suaBody.length, air: air.length, airBytes: airBody.length, index: index, stats: res.stats, bytes: bytes,
+
+  var worldDir = opts && opts.worldDir, worldInfo = null;
+  if (worldDir) {
+    var rd = function (n) { var f = path.join(worldDir, n); return fs.existsSync(f) ? fs.readFileSync(f, 'utf8') : null; };
+    var wfix = rd('FIX_BASE.csv'), wapt = rd('airports.csv'), wnav = rd('navaids.csv');
+    if (!wfix || !wapt || !wnav) throw new Error('world data incomplete in ' + worldDir);
+    var w = worldData.world(wfix, wapt, wnav, res.nav);
+    // As with the CIFP, a truncated download must not publish a thin file.
+    if (w.stats.fixes < 30000 || w.stats.airports < 20000 || w.stats.navaids < 3000) {
+      throw new Error('world data looks partial: ' + JSON.stringify(w.stats));
+    }
+    var worldBody = JSON.stringify({ v: FORMAT, c: res.cycle, effective: res.effective, b: built,
+      src: 'FAA NASR (public domain) and OurAirports (public domain). Not for navigation.',
+      p: w.p, a: w.a });
+    fs.writeFileSync(path.join(root, 'world.json'), worldBody);
+    worldInfo = { stats: w.stats, bytes: worldBody.length };
+  }
+  return { world: worldInfo, navBytes: navBody.length, navPoints: res.nav.length, sua: sua.length, suaBytes: suaBody.length, air: air.length, airBytes: airBody.length, index: index, stats: res.stats, bytes: bytes,
            segBytes: segBytes, segMax: segMax, cells: cellKeys.length };
 }
 
 if (require.main === module) {
-  var src = process.argv[2], out = process.argv[3];
+  var src = process.argv[2], out = process.argv[3], wdir = process.argv[4];
   if (!src || !out) {
     console.error('usage: build.js <FAACIFP18> <out-dir>');
     process.exit(2);
   }
-  var r = build(src, out);
+  var r = build(src, out, { worldDir: wdir });
   console.log('cycle ' + r.index.cycle + ', effective ' + r.index.effective +
               ', expires ' + r.index.expires);
   console.log(r.index.apt.length + ' airports, ' + r.stats.procedures + ' procedures, ' +
@@ -276,6 +297,9 @@ if (require.main === module) {
   console.log(r.air + ' pieces of Class B, C and D airspace, ' + Math.round(r.airBytes / 1024) + ' kB');
   console.log(r.sua + ' pieces of special use airspace, ' + Math.round(r.suaBytes / 1024) + ' kB');
   console.log(r.navPoints + ' en-route points by name, ' + Math.round(r.navBytes / 1024) + ' kB');
+  if (r.world) console.log('world.json: ' + r.world.stats.fixes + ' NASR fixes, ' + r.world.stats.navaids +
+    ' foreign navaids, ' + r.world.stats.airports + ' airports (' + r.world.stats.airportCodes + ' codes), ' +
+    Math.round(r.world.bytes / 1024) + ' kB');
   console.log(r.cells + ' cells, ' + (r.segBytes / 1048576).toFixed(1) + ' MB of leg files, largest ' +
               Math.round(r.segMax / 1024) + ' kB');
 }

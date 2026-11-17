@@ -27,14 +27,22 @@ function effectiveOn(iso) {
   return new Date(e + n * DAYS * day).toISOString().slice(0, 10);
 }
 
+/** The FAA NASR CSV set for the same cycle (FIX_BASE.csv and friends). */
+function nasrUrlFor(effective) {
+  var mon = 'JanFebMarAprMayJunJulAugSepOctNovDec'.substr((+effective.slice(5, 7) - 1) * 3, 3);
+  return 'https://nfdc.faa.gov/webContent/28DaySub/extra/' + effective.slice(8, 10) + '_' + mon + '_' +
+    effective.slice(0, 4) + '_CSV.zip';
+}
+
 function urlFor(effective) {
   return URL.replace('{YYMMDD}', effective.slice(2, 4) + effective.slice(5, 7) + effective.slice(8, 10));
 }
 
 if (require.main === module) {
-  var today = process.argv[2] || new Date().toISOString().slice(0, 10);
+  var nasr = process.argv[2] === '--nasr';
+  var today = process.argv[nasr ? 3 : 2] || new Date().toISOString().slice(0, 10);
   var eff = effectiveOn(today);
-  console.log(eff + ' ' + urlFor(eff));
+  console.log(nasr ? nasrUrlFor(eff) : eff + ' ' + urlFor(eff));
 }
 
-module.exports = { effectiveOn: effectiveOn, urlFor: urlFor, EPOCH: EPOCH };
+module.exports = { effectiveOn: effectiveOn, urlFor: urlFor, nasrUrlFor: nasrUrlFor, EPOCH: EPOCH };

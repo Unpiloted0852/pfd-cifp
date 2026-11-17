@@ -39,6 +39,7 @@ cycle that is already published.
     v1/airspace.json    Class B, C and D airspace, as outlines
     v1/sua.json         special use airspace, as outlines
     v1/nav.json         en-route waypoints, navaids and airways, by name
+    v1/world.json       what nav.json lacks: all US fixes, foreign navaids, airports worldwide
 
 `airspace.json` is one file for the country: `a` is a list of pieces, each
 `[class, name, floor ft, "M"|"A", ceiling ft, "M"|"A", [lat, lon, lat, lon, ...]]`
@@ -60,6 +61,13 @@ for fix-radial-distance points), `N` NDB or `W` waypoint. An identifier can
 name more than one point in different regions; take the one nearest the route.
 `w` is every airway as `[name, [id, lat, lon, id, lat, lon, ...]]`, in order;
 an airway broken by a gap in the data appears as more than one entry.
+
+`world.json` fills in what the CIFP doesn't have, in the same shapes: `p` as in
+`nav.json` (every US fix from the FAA's NASR, which the CIFP lists only when an
+airway or procedure uses it, and radio navaids outside the US from OurAirports),
+and `a`, every airport worldwide that isn't a heliport or closed, as `[code, lat,
+lon]` once for each code it goes by (ICAO, GPS code, and the FAA code for US
+fields). OurAirports is public domain and community-kept: good, not authoritative.
 
 `index.json`:
 

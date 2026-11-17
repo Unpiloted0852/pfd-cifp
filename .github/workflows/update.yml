@@ -72,8 +72,8 @@ jobs:
             || true)
           echo "published: ${PUBLISHED:-nothing}"
           # A file added to the build since the last deploy is not there yet.
-          AIRSPACE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$BASE_URL/v1/nav.json" || true)
-          echo "newest file (nav.json): $AIRSPACE"
+          AIRSPACE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$BASE_URL/v1/world.json" || true)
+          echo "newest file (world.json): $AIRSPACE"
           if [ "$FORCE" = "true" ] || [ "$PUBLISHED" != "$EFFECTIVE" ] || [ "$AIRSPACE" != "200" ]; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           else
@@ -91,10 +91,25 @@ jobs:
           unzip -o -q work/cifp.zip FAACIFP18 -d work
           ls -l work
 
+      # Points the CIFP lacks, for expanding filed routes: every US fix (FAA
+      # NASR, same cycle) and foreign navaids and airports (OurAirports).
+      - name: Fetch NASR fixes and OurAirports
+        if: steps.plan.outputs.deploy == 'true'
+        run: |
+          mkdir -p work/world
+          curl -fL --retry 4 --retry-delay 20 --max-time 300 -A 'Mozilla/5.0 (pfd-cifp build)' \
+            -o work/nasr.zip "$(node build/cycle.js --nasr)"
+          unzip -o -q work/nasr.zip FIX_BASE.csv -d work/world
+          for f in airports navaids; do
+            curl -fL --retry 4 --retry-delay 20 --max-time 300 \
+              -o work/world/$f.csv "https://davidmegginson.github.io/ourairports-data/$f.csv"
+          done
+          ls -l work/world
+
       - name: Build
         if: steps.plan.outputs.deploy == 'true'
         run: |
-          node build/build.js work/FAACIFP18 out | tee -a "$GITHUB_STEP_SUMMARY"
+          node build/build.js work/FAACIFP18 out work/world | tee -a "$GITHUB_STEP_SUMMARY"
           # The file must be the cycle that was asked for. The FAA posts the
           # next cycle weeks early under the same naming, and a wrong date in
           # cycle.js would otherwise publish it as current.
