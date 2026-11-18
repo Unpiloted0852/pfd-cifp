@@ -26,6 +26,7 @@ var path = require('path');
 var cifp = require('./cifp-parse.js');
 var airspace = require('./airspace.js');
 var worldData = require('./world.js');
+var aixm = require('./aixm.js');
 
 var FORMAT = 1;
 
@@ -268,15 +269,22 @@ function build(src, outDir, opts) {
     if (!wfix || !wapt || !wnav) throw new Error('world data incomplete in ' + worldDir);
     var awyNames = Object.create(null);
     res.airways.forEach(function (x) { awyNames[x.name] = 1; });
-    var w = worldData.world(wfix, wapt, wnav, res.nav, rd('fix.dat'), rd('awy.dat'), awyNames);
+    // Germany (DFS AIXM 5.1), when its files were fetched.
+    var de = ['ED_Waypoints.xml', 'ED_Navaids.xml', 'ED_Routes.xml'].map(rd);
+    var deData = de.every(Boolean) ? aixm.extract(de) : null;
+    if (deData && (deData.p.length < 3000 || deData.s.length < 1000)) {
+      throw new Error('DFS data looks partial: ' + deData.p.length + ' points, ' + deData.s.length + ' segments');
+    }
+    var w = worldData.world(wfix, wapt, wnav, res.nav, rd('fix.dat'), rd('awy.dat'), awyNames, deData);
     // As with the CIFP, a truncated download must not publish a thin file.
     if (w.stats.fixes < 30000 || w.stats.airports < 20000 || w.stats.navaids < 3000) {
       throw new Error('world data looks partial: ' + JSON.stringify(w.stats));
     }
     var worldBody = JSON.stringify({ v: FORMAT, c: res.cycle, effective: res.effective, b: built,
-      src: 'FAA NASR (public domain), OurAirports (public domain); o/ow: FlightGear navdata, ' +
-        '(c) 2013 Robin A. Peel, GPL v2 or later, cycle 2013.10. Not for navigation.',
-      p: w.p, a: w.a, o: w.o, ow: w.ow });
+      src: 'FAA NASR (public domain), OurAirports (public domain), DFS Deutsche Flugsicherung ' +
+        '(German waypoints, navaids and routes, CC BY 4.0, https://aip.dfs.de/datasets/); o/ow: FlightGear ' +
+        'navdata, (c) 2013 Robin A. Peel, GPL v2 or later, cycle 2013.10. Not for navigation.',
+      p: w.p, a: w.a, cw: w.cw, o: w.o, ow: w.ow });
     fs.writeFileSync(path.join(root, 'world.json'), worldBody);
     worldInfo = { stats: w.stats, bytes: worldBody.length };
   }
@@ -302,6 +310,7 @@ if (require.main === module) {
   console.log(r.navPoints + ' en-route points by name, ' + Math.round(r.navBytes / 1024) + ' kB');
   if (r.world) console.log('world.json: ' + r.world.stats.fixes + ' NASR fixes, ' + r.world.stats.navaids +
     ' foreign navaids, ' + r.world.stats.airports + ' airports (' + r.world.stats.airportCodes + ' codes), ' +
+    r.world.stats.aixmPoints + ' German points, ' + r.world.stats.aixmSegs + ' German airway segments, ' +
     r.world.stats.oldFixes + ' 2013 fixes, ' + r.world.stats.oldAirwaySegs + ' 2013 airway segments, ' +
     Math.round(r.world.bytes / 1024) + ' kB');
   console.log(r.cells + ' cells, ' + (r.segBytes / 1048576).toFixed(1) + ' MB of leg files, largest ' +

@@ -68,6 +68,9 @@ airway or procedure uses it, and radio navaids outside the US from OurAirports),
 and `a`, every airport worldwide that isn't a heliport or closed, as `[code, lat,
 lon]` once for each code it goes by (ICAO, GPS code, and the FAA code for US
 fields). OurAirports is public domain and community-kept: good, not authoritative.
+`cw` is airway segments `[airway, id, lat, lon, id, lat, lon]` from current
+national data the CIFP doesn't cover: Germany's, from DFS Deutsche Flugsicherung
+(https://aip.dfs.de/datasets/, CC BY 4.0; its points are in `p`).
 `o` and `ow` are a last resort: five-letter waypoints `[id, lat, lon]` and airway
 segments `[airway, id, lat, lon, id, lat, lon]` from FlightGear's navigation data
 (Robin A. Peel's X-Plane data, cycle 2013.10, GPL v2 or later), only for names and

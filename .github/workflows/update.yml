@@ -104,6 +104,12 @@ jobs:
             curl -fL --retry 4 --retry-delay 20 --max-time 300 \
               -o work/world/$f.csv "https://davidmegginson.github.io/ourairports-data/$f.csv"
           done
+          # Germany: DFS waypoints, navaids and routes (AIXM 5.1, CC BY 4.0), same cycle.
+          EFF='${{ steps.plan.outputs.effective }}'
+          for f in Waypoints Navaids Routes; do
+            curl -fL --retry 4 --retry-delay 20 --max-time 300 -A 'Mozilla/5.0 (pfd-cifp build)' \
+              -o work/world/ED_$f.xml "https://aip.dfs.de/datasets/scripts/getItem.php?amdt=9999&content=ED_${f}_${EFF}_${EFF}_snapshot.xml"
+          done
           # FlightGear's worldwide waypoints and airways (2013, GPL), a last fallback.
           for f in fix awy; do
             curl -fL --retry 4 --retry-delay 20 --max-time 300 \

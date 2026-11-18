@@ -7,6 +7,8 @@
  *  - OurAirports navaids.csv and airports.csv: radio beacons and airports
  *    worldwide. Public domain, updated daily by its community.
  *
+ *  - DFS (Germany) AIXM 5.1 waypoints, navaids and routes, CC BY 4.0
+ *    (https://aip.dfs.de/datasets/): current, same 28-day cycle.
  *  - FlightGear's fix.dat and awy.dat (Robin A. Peel's X-Plane data, cycle 2013.10,
  *    GPL): five-letter waypoints and airways worldwide. Old, so it is kept apart
  *    and only for names nothing current has.
@@ -14,6 +16,8 @@
  * Published as v1/world.json beside nav.json, which is unchanged:
  *   p: [id, lat, lon, kind(, declination)]  kind W waypoint, V VHF navaid, N NDB
  *   a: [id, lat, lon]                       airports, under each code they go by
+ *   cw: [airway, id, lat, lon, id, lat, lon] current airway segments outside the
+ *                                            CIFP (Germany, DFS)
  *   o: [id, lat, lon]                       2013 waypoints, names found nowhere else
  *   ow: [airway, id, lat, lon, id, lat, lon] 2013 airway segments, airways the CIFP lacks
  */
@@ -53,12 +57,13 @@ function r4(v) { return Math.round(v * 1e4) / 1e4; }
  * @param navCsv   OurAirports navaids.csv text (or null)
  * @param known    nav.json points already published, [id, lat, lon, ...]
  */
-function world(fixCsv, aptCsv, navCsv, known, fgFix, fgAwy, knownAirways) {
+function world(fixCsv, aptCsv, navCsv, known, fgFix, fgAwy, knownAirways, aixmData) {
   var have = Object.create(null);
   (known || []).forEach(function (p) { have[p[0] + '|' + Math.round(p[1] * 50) + '|' + Math.round(p[2] * 50)] = 1; });
   function isKnown(id, la, lo) { return have[id + '|' + Math.round(la * 50) + '|' + Math.round(lo * 50)]; }
 
-  var p = [], a = [], o = [], ow = [], stats = { fixes: 0, navaids: 0, airports: 0, airportCodes: 0, oldFixes: 0, oldAirwaySegs: 0 };
+  var p = [], a = [], o = [], ow = [], cw = [],
+    stats = { fixes: 0, navaids: 0, airports: 0, airportCodes: 0, oldFixes: 0, oldAirwaySegs: 0, aixmPoints: 0, aixmSegs: 0 };
 
   if (fixCsv) {
     parseCsv(fixCsv).forEach(function (r) {
@@ -101,6 +106,15 @@ function world(fixCsv, aptCsv, navCsv, known, fgFix, fgAwy, knownAirways) {
       ids.forEach(function (id) { a.push([id, r4(la), r4(lo)]); stats.airportCodes++; });
     });
   }
+  // Current national data (Germany): points the others don't have, and airways.
+  if (aixmData) {
+    aixmData.p.forEach(function (x) {
+      if (isKnown(x[0], x[1], x[2])) return;
+      p.push(x); stats.aixmPoints++;
+    });
+    aixmData.s.forEach(function (x) { cw.push(x); stats.aixmSegs++; });
+  }
+
   if (fgFix) {
     var named = Object.create(null);
     (known || []).forEach(function (k) { named[k[0]] = 1; });
@@ -121,17 +135,19 @@ function world(fixCsv, aptCsv, navCsv, known, fgFix, fgAwy, knownAirways) {
 
   if (fgAwy) {
     var skipAwy = knownAirways || Object.create(null);
+    var currentAwy = Object.create(null);
+    cw.forEach(function (x) { currentAwy[x[0]] = 1; });
     fgAwy.split('\n').forEach(function (l) {
       var f = l.trim().split(/\s+/);
       if (f.length < 10 || !isFinite(+f[1]) || !isFinite(+f[4])) return;
       f[9].split('-').forEach(function (name) {
-        if (!name || skipAwy[name]) return;
+        if (!name || skipAwy[name] || currentAwy[name]) return;
         ow.push([name, f[0], r4(+f[1]), r4(+f[2]), f[3], r4(+f[4]), r4(+f[5])]);
         stats.oldAirwaySegs++;
       });
     });
   }
-  return { p: p, a: a, o: o, ow: ow, stats: stats };
+  return { p: p, a: a, o: o, ow: ow, cw: cw, stats: stats };
 }
 
 module.exports = { world: world, parseCsv: parseCsv };
